@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LinkedIn Data Science Posts Analysis</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #0a66c2;
+            --secondary-color: #f5f5f5;
+            --text-color: #333;
+            --highlight-color: #0073b1;
+            --chart-color-1: #0a66c2;
+            --chart-color-2: #16c2f5;
+            --chart-color-3: #8a3ab9;
+            --chart-color-4: #e4405f;
+            --chart-color-5: #5851db;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem 0;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            transition: transform 0.3s ease;
+            height: 100%;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h2 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .filters {
+            background: white;
+            padding: 1rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .filter-item {
+            display: flex;
+            flex-direction: column;
+            min-width: 150px;
+        }
+
+        .filter-item label {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        select, button {
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: var(--highlight-color);
+        }
+
+        .tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            pointer-events: none;
+            font-size: 14px;
+            z-index: 10;
+        }
+
+        .chart-container {
+            width: 100%;
+            height: 300px;
+        }
+
+        .tag-cloud {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .tag {
+            padding: 5px 10px;
+            background: var(--secondary-color);
+            border-radius: 20px;
+            display: inline-block;
+            transition: transform 0.3s ease, background-color 0.3s ease;
+            cursor: pointer;
+        }
+
+        .tag:hover {
+            transform: scale(1.05);
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .engagement-metrics {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 1rem;
+            text-align: center;
+        }
+
+        .metric {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .timeline {
+            position: relative;
+            margin-top: 2rem;
+            height: 100px;
+        }
+
+        footer {
+            background-color: var(--primary-color);
+            color: white;
+            text-align: center;
+            padding: 1rem 0;
+            margin-top: 3rem;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            .container {
+                padding: 1rem;
+            }
+        }
+        
+        /* Animation for data loading */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        /* Toggle switch for dark/light mode */
+        .theme-switch {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+        }
+        
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: var(--highlight-color);
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>LinkedIn Data Science Trend Analysis</h1>
+        <p>Analyzing the most popular data science topics on LinkedIn in the last month</p>
+        <div class="theme-switch">
+            <label class="switch">
+                <input type="checkbox" id="theme-toggle">
+                <span class="slider"></span>
+            </label>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="filters">
+            <div class="filter-item">
+                <label for="time-period">Time Period</label>
+                <select id="time-period">
+                    <option value="7">Last 7 days</option>
+                    <option value="14">Last 14 days</option>
+                    <option value="30" selected>Last 30 days</option>
+                </select>
+            </div>
+            <div class="filter-item">
+                <label for="engagement-type">Engagement Metric</label>
+                <select id="engagement-type">
+                    <option value="likes">Likes</option>
+                    <option value="comments">Comments</option>
+                    <option value="shares">Shares</option>
+                    <option value="total" selected>Total Engagement</option>
+                </select>
+            </div>
+            <div class="filter-item">
+                <label for="topic-filter">Topic Filter</label>
+                <select id="topic-filter">
+                    <option value="all" selected>All Topics</option>
+                    <option value="python">Python</option>
+                    <option value="sql">SQL</option>
+                    <option value="ml">Machine Learning</option>
+                    <option value="ai">Artificial Intelligence</option>
+                    <option value="datavis">Data Visualization</option>
+                </select>
+            </div>
+            <button id="apply-filters">Apply Filters</button>
+        </div>
+
+        <div class="dashboard">
+            <div class="card">
+                <h2>Most Popular Topics</h2>
+                <div id="topics-chart" class="chart-container"></div>
+            </div>
+            <div class="card">
+                <h2>Posts Over Time</h2>
+                <div id="timeline-chart" class="chart-container"></div>
+            </div>
+            <div class="card">
+                <h2>Engagement Metrics</h2>
+                <div class="engagement-metrics">
+                    <div class="metric">
+                        <div class="metric-value" id="total-posts">584</div>
+                        <div class="metric-label">Total Posts</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value" id="avg-likes">87</div>
+                        <div class="metric-label">Avg. Likes</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value" id="avg-comments">12</div>
+                        <div class="metric-label">Avg. Comments</div>
+                    </div>
+                </div>
+                <div id="engagement-chart" class="chart-container"></div>
+            </div>
+            <div class="card">
+                <h2>Popular Hashtags</h2>
+                <div id="hashtag-cloud" class="tag-cloud">
+                    <!-- Tags will be added dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>© 2025 LinkedIn Data Science Analysis | Created as a Data Science Project</p>
+    </footer>
+
+    <script>
+        // Sample data - this would be replaced with your actual data from scraping
+        const sampleData = {
+            topics: [
+                { name: "Python", value: 145, percent: 24.8 },
+                { name: "Machine Learning", value: 128, percent: 21.9 },
+                { name: "Data Visualization", value: 87, percent: 14.9 },
+                { name: "SQL", value: 76, percent: 13.0 },
+                { name: "Artificial Intelligence", value: 67, percent: 11.5 },
+                { name: "Big Data", value: 45, percent: 7.7 },
+                { name: "Statistics", value: 36, percent: 6.2 }
+            ],
+            timeline: Array.from({ length: 30 }, (_, i) => ({
+                day: i + 1,
+                count: Math.floor(Math.random() * 30) + 10
+            })),
+            hashtags: [
+                { text: "#datascience", size: 45, count: 203 },
+                { text: "#python", size: 40, count: 187 },
+                { text: "#machinelearning", size: 38, count: 174 },
+                { text: "#ai", size: 35, count: 156 },
+                { text: "#dataanalysis", size: 32, count: 143 },
+                { text: "#dataviz", size: 30, count: 132 },
+                { text: "#bigdata", size: 28, count: 124 },
+                { text: "#sql", size: 25, count: 112 },
+                { text: "#deeplearning", size: 23, count: 102 },
+                { text: "#pandas", size: 20, count: 89 },
+                { text: "#statistics", size: 18, count: 81 },
+                { text: "#analytics", size: 17, count: 75 },
+                { text: "#dataanalytics", size: 16, count: 71 },
+                { text: "#nlp", size: 15, count: 67 },
+                { text: "#tableau", size: 14, count: 63 }
+            ],
+            engagement: {
+                likes: 50834,
+                comments: 7012,
+                shares: 12467
+            }
+        };
+
+        // Initialize D3 charts
+        document.addEventListener('DOMContentLoaded', function() {
+            // Create topic bar chart
+            createTopicChart();
+            
+            // Create timeline chart
+            createTimelineChart();
+            
+            // Create engagement chart
+            createEngagementChart();
+            
+            // Create hashtag cloud
+            createHashtagCloud();
+            
+            // Setup event listeners
+            document.getElementById('apply-filters').addEventListener('click', updateVisualizations);
+            document.getElementById('theme-toggle').addEventListener('change', toggleTheme);
+        });
+
+        function createTopicChart() {
+            // Clear any existing chart
+            d3.select("#topics-chart").html("");
+            
+            // Setup dimensions
+            const width = document.getElementById('topics-chart').clientWidth;
+            const height = 300;
+            const margin = { top: 20, right: 30, bottom: 60, left: 60 };
+            const innerWidth = width - margin.left - margin.right;
+            const innerHeight = height - margin.top - margin.bottom;
+            
+            // Create SVG
+            const svg = d3.select("#topics-chart")
+                .append("svg")
+                .attr("width", width)
+                .attr("height", height);
+                
+            const g = svg.append("g")
+                .attr("transform", `translate(${margin.left},${margin.top})`);
+                
+            // Create scales
+            const xScale = d3.scaleBand()
+                .domain(sampleData.topics.map(d => d.name))
+                .range([0, innerWidth])
+                .padding(0.2);
+                
+            const yScale = d3.scaleLinear()
+                .domain([0, d3.max(sampleData.topics, d => d.value) * 1.1])
+                .range([innerHeight, 0]);
+                
+            // Create axes
+            g.append("g")
+                .attr("transform", `translate(0,${innerHeight})`)
+                .call(d3.axisBottom(xScale))
+                .selectAll("text")
+                .attr("transform", "rotate(-45)")
+                .style("text-anchor", "end")
+                .attr("dx", "-.8em")
+                .attr("dy", ".15em");
+                
+            g.append("g")
+                .call(d3.axisLeft(yScale));
+                
+            // Create bars
+            g.selectAll(".bar")
+                .data(sampleData.topics)
+                .enter()
+                .append("rect")
+                .attr("class", "bar")
+                .attr("x", d => xScale(d.name))
+                .attr("y", d => yScale(d.value))
+                .attr("width", xScale.bandwidth())
+                .attr("height", d => innerHeight - yScale(d.value))
+                .attr("fill", (d, i) => {
+                    const colors = ["var(--chart-color-1)", "var(--chart-color-2)", "var(--chart-color-3)", 
+                                    "var(--chart-color-4)", "var(--chart-color-5)"];
+                    return colors[i % colors.length];
+                })
+                .on("mouseover", function(event, d) {
+                    showTooltip(event, `${d.name}: ${d.value} posts (${d.percent}%)`);
+                    d3.select(this).attr("opacity", 0.8);
+                })
+                .on("mouseout", function() {
+                    hideTooltip();
+                    d3.select(this).attr("opacity", 1);
+                });
+                
+            // Add title
+            g.append("text")
+                .attr("class", "chart-title")
+                .attr("x", innerWidth / 2)
+                .attr("y", -5)
+                .attr("text-anchor", "middle")
+                .text("Number of Posts by Topic");
+                
+            // Add y-axis label
+            g.append("text")
+                .attr("transform", "rotate(-90)")
+                .attr("y", -40)
+                .attr("x", -innerHeight / 2)
+                .attr("text-anchor", "middle")
+                .text("Number of Posts");
+        }
+
+        function createTimelineChart() {
+            // Clear any existing chart
+            d3.select("#timeline-chart").html("");
+            
+            // Setup dimensions
+            const width = document.getElementById('timeline-chart').clientWidth;
+            const height = 300;
+            const margin = { top: 20, right: 30, bottom: 40, left: 50 };
+            const innerWidth = width - margin.left - margin.right;
+            const innerHeight = height - margin.top - margin.bottom;
+            
+            // Create SVG
+            const svg = d3.select("#timeline-chart")
+                .append("svg")
+                .attr("width", width)
+                .attr("height", height);
+                
+            const g = svg.append("g")
+                .attr("transform", `translate(${margin.left},${margin.top})`);
+                
+            // Create scales
+            const xScale = d3.scaleLinear()
+                .domain([1, 30])
+                .range([0, innerWidth]);
+                
+            const yScale = d3.scaleLinear()
+                .domain([0, d3.max(sampleData.timeline, d => d.count) * 1.1])
+                .range([innerHeight, 0]);
+                
+            // Create line generator
+            const line = d3.line()
+                .x(d => xScale(d.day))
+                .y(d => yScale(d.count))
+                .curve(d3.curveMonotoneX);
+                
+            // Create axes
+            g.append("g")
+                .attr("transform", `translate(0,${innerHeight})`)
+                .call(d3.axisBottom(xScale).ticks(10).tickFormat(d => `Day ${d}`));
+                
+            g.append("g")
+                .call(d3.axisLeft(yScale));
+                
+            // Add line path
+            g.append("path")
+                .datum(sampleData.timeline)
+                .attr("fill", "none")
+                .attr("stroke", "var(--chart-color-1)")
+                .attr("stroke-width", 2)
+                .attr("d", line);
+                
+            // Add dots
+            g.selectAll(".dot")
+                .data(sampleData.timeline)
+                .enter()
+                .append("circle")
+                .attr("class", "dot")
+                .attr("cx", d => xScale(d.day))
+                .attr("cy", d => yScale(d.count))
+                .attr("r", 4)
+                .attr("fill", "var(--chart-color-1)")
+                .on("mouseover", function(event, d) {
+                    showTooltip(event, `Day ${d.day}: ${d.count} posts`);
+                    d3.select(this).attr("r", 6);
+                })
+                .on("mouseout", function() {
+                    hideTooltip();
+                    d3.select(this).attr("r", 4);
+                });
+                
+            // Add title
+            g.append("text")
+                .attr("class", "chart-title")
+                .attr("x", innerWidth / 2)
+                .attr("y", -5)
+                .attr("text-anchor", "middle")
+                .text("Posts Per Day (Last 30 Days)");
+                
+            // Add y-axis label
+            g.append("text")
+                .attr("transform", "rotate(-90)")
+                .attr("y", -40)
+                .attr("x", -innerHeight / 2)
+                .attr("text-anchor", "middle")
+                .text("Number of Posts");
+        }
+
+        function createEngagementChart() {
+            // Clear any existing chart
+            d3.select("#engagement-chart").html("");
+            
+            // Setup dimensions
+            const width = document.getElementById('engagement-chart').clientWidth;
+            const height = 200;
+            const margin = { top: 20, right: 30, bottom: 40, left: 60 };
+            const innerWidth = width - margin.left - margin.right;
+            const innerHeight = height - margin.top - margin.bottom;
+            
+            // Create data for pie chart
+            const data = [
+                { name: "Likes", value: sampleData.engagement.likes },
+                { name: "Comments", value: sampleData.engagement.comments },
+                { name: "Shares", value: sampleData.engagement.shares }
+            ];
+            
+            // Create SVG
+            const svg = d3.select("#engagement-chart")
+                .append("svg")
+                .attr("width", width)
+                .attr("height", height);
+                
+            const g = svg.append("g")
+                .attr("transform", `translate(${width / 2},${height / 2})`);
+                
+            // Create pie chart
+            const pie = d3.pie()
+                .value(d => d.value)
+                .sort(null);
+                
+            const arc = d3.arc()
+                .innerRadius(50)
+                .outerRadius(Math.min(width, height) / 2 - 20);
+                
+            const color = d3.scaleOrdinal()
+                .domain(data.map(d => d.name))
+                .range(["var(--chart-color-1)", "var(--chart-color-2)", "var(--chart-color-3)"]);
+                
+            // Add arcs
+            const arcs = g.selectAll(".arc")
+                .data(pie(data))
+                .enter()
+                .append("g")
+                .attr("class", "arc");
+                
+            arcs.append("path")
+                .attr("d", arc)
+                .attr("fill", d => color(d.data.name))
+                .attr("stroke", "white")
+                .style("stroke-width", "2px")
+                .on("mouseover", function(event, d) {
+                    const percent = ((d.data.value / (sampleData.engagement.likes + sampleData.engagement.comments + sampleData.engagement.shares)) * 100).toFixed(1);
+                    showTooltip(event, `${d.data.name}: ${d.data.value.toLocaleString()} (${percent}%)`);
+                    d3.select(this).attr("opacity", 0.8);
+                })
+                .on("mouseout", function() {
+                    hideTooltip();
+                    d3.select(this).attr("opacity", 1);
+                });
+                
+            // Add labels
+            const label = d3.arc()
+                .innerRadius(arc.outerRadius()() * 0.8)
+                .outerRadius(arc.outerRadius()() * 0.8);
+                
+            arcs.append("text")
+                .attr("transform", d => `translate(${label.centroid(d)})`)
+                .attr("dy", "0.35em")
+                .attr("text-anchor", "middle")
+                .attr("fill", "white")
+                .style("font-size", "12px")
+                .text(d => {
+                    const percent = ((d.data.value / (sampleData.engagement.likes + sampleData.engagement.comments + sampleData.engagement.shares)) * 100).toFixed(0);
+                    return `${percent}%`;
+                });
+        }
+
+        function createHashtagCloud() {
+            const container = document.getElementById("hashtag-cloud");
+            container.innerHTML = "";
+            
+            sampleData.hashtags.forEach(tag => {
+                const tagEl = document.createElement("div");
+                tagEl.className = "tag";
+                tagEl.textContent = tag.text;
+                tagEl.style.fontSize = `${tag.size / 10 + 0.8}rem`;
+                
+                tagEl.addEventListener("mouseover", function(event) {
+                    showTooltip(event, `${tag.text}: ${tag.count} mentions`);
+                });
+                
+                tagEl.addEventListener("mouseout", function() {
+                    hideTooltip();
+                });
+                
+                container.appendChild(tagEl);
+            });
+        }
+
+        // Tooltip functions
+        function showTooltip(event, text) {
+            let tooltip = document.querySelector(".tooltip");
+            
+            if (!tooltip) {
+                tooltip = document.createElement("div");
+                tooltip.className = "tooltip";
+                document.body.appendChild(tooltip);
+            }
+            
+            tooltip.innerHTML = text;
+            tooltip.style.left = (event.pageX + 10) + "px";
+            tooltip.style.top = (event.pageY + 10) + "px";
+            tooltip.style.display = "block";
+        }
+
+        function hideTooltip() {
+            const tooltip = document.querySelector(".tooltip");
+            if (tooltip) {
+                tooltip.style.display = "none";
+            }
+        }
+
+        // Update visualizations based on filters
+        function updateVisualizations() {
+            // In a real application, this would fetch new data based on the filters
+            // For this demo, we'll just recreate the charts with the same data
+            createTopicChart();
+            createTimelineChart();
+            createEngagementChart();
+            
+            // Simulate data loading
+            const dashboard = document.querySelector(".dashboard");
+            dashboard.classList.remove("fade-in");
+            void dashboard.offsetWidth; // Trigger reflow
+            dashboard.classList.add("fade-in");
+            
+            // Show a message that filters were applied
+            alert("Filters applied! In a real application, this would fetch new data based on your selection.");
+        }
+
+        // Toggle dark/light theme
+        function toggleTheme() {
+            const isDark = document.getElementById('theme-toggle').checked;
+            
+            if (isDark) {
+                document.documentElement.style.setProperty('--secondary-color', '#1c1c1c');
+                document.documentElement.style.setProperty('--text-color', '#f5f5f5');
+                document.body.style.backgroundColor = '#1c1c1c';
+                document.querySelectorAll('.card').forEach(card => {
+                    card.style.backgroundColor = '#2d2d2d';
+                    card.style.color = '#f5f5f5';
+                });
+                document.querySelector('.filters').style.backgroundColor = '#2d2d2d';
+                document.querySelector('.filters').style.color = '#f5f5f5';
+            } else {
+                document.documentElement.style.setProperty('--secondary-color', '#f5f5f5');
+                document.documentElement.style.setProperty('--text-color', '#333');
+                document.body.style.backgroundColor = '#f5f5f5';
+                document.querySelectorAll('.card').forEach(card => {
+                    card.style.backgroundColor = 'white';
+                    card.style.color = '#333';
+                });
+                document.querySelector('.filters').style.backgroundColor = 'white';
+                document.querySelector('.filters').style.color = '#333';
+            }
+            
+            // Redraw charts with new theme
+            createTopicChart();
+            createTimelineChart();
+            createEngagementChart();
+        }
+    </script>
+</body>
+</html>
