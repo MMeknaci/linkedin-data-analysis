@@ -3,236 +3,270 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LinkedIn Data Science Posts Analysis</title>
+    <title>LinkedIn Data Science Trends - Interactive Infographic</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
     <style>
+        /* Color Variables and Root Styling */
         :root {
-            --primary-color: #0a66c2;
-            --secondary-color: #f5f5f5;
-            --text-color: #333;
-            --highlight-color: #0073b1;
-            --chart-color-1: #0a66c2;
-            --chart-color-2: #16c2f5;
-            --chart-color-3: #8a3ab9;
-            --chart-color-4: #e4405f;
-            --chart-color-5: #5851db;
+            --primary: #0a66c2;
+            --primary-light: #4a90e2;
+            --primary-dark: #0e4f8b;
+            --secondary: #16c2f5;
+            --accent: #6b4ce6;
+            --accent-light: #9277ff;
+            --text-dark: #2e3b4e;
+            --text-light: #f8fafc;
+            --background: #f0f4f8;
+            --card-bg: #ffffff;
+            --card-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+            --success: #38cc77;
+            --warning: #fec84b;
+            --danger: #ef4565;
+            --gradient-bg: linear-gradient(135deg, var(--primary-dark), var(--primary), var(--secondary));
+            --transition-normal: 0.3s ease;
+            --radius: 12px;
         }
 
+        /* Dark Mode Variables */
+        [data-theme="dark"] {
+            --primary: #4a90e2;
+            --primary-light: #72b1ff;
+            --primary-dark: #2c5282;
+            --secondary: #00b5e2;
+            --accent: #9277ff;
+            --accent-light: #b69eff;
+            --text-dark: #e2e8f0;
+            --text-light: #f8fafc;
+            --background: #121826;
+            --card-bg: #1e293b;
+            --card-shadow: 0 8px 30px rgba(0, 0, 0, 0.28);
+            --gradient-bg: linear-gradient(135deg, #192339, #293653, #364670);
+        }
+
+        /* Base Styles */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            scroll-padding-top: 70px;
         }
 
         body {
-            background-color: var(--secondary-color);
-            color: var(--text-color);
+            background-color: var(--background);
+            color: var(--text-dark);
             line-height: 1.6;
+            overflow-x: hidden;
+            transition: background-color var(--transition-normal);
         }
 
-        header {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 1rem 0;
-            text-align: center;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            position: sticky;
-            top: 0;
-            z-index: 100;
+        /* Typography */
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: 700;
+            line-height: 1.25;
+            margin-bottom: 0.5em;
+            color: var(--text-dark);
+            transition: color var(--transition-normal);
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem;
+        h1 {
+            font-size: 2.5rem;
         }
 
-        .dashboard {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            margin-top: 2rem;
+        h2 {
+            font-size: 1.75rem;
+            margin-top: 0.5rem;
         }
 
-        .card {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            padding: 1.5rem;
-            transition: transform 0.3s ease;
-            height: 100%;
+        h3 {
+            font-size: 1.3rem;
+            margin-top: 1rem;
+            color: var(--primary);
         }
 
-        .card:hover {
-            transform: translateY(-5px);
-        }
-
-        .card h2 {
-            color: var(--primary-color);
+        p {
             margin-bottom: 1rem;
-            font-size: 1.5rem;
-            border-bottom: 2px solid var(--secondary-color);
-            padding-bottom: 0.5rem;
-        }
-
-        .filters {
-            background: white;
-            padding: 1rem;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            margin-bottom: 2rem;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-            align-items: center;
-        }
-
-        .filter-item {
-            display: flex;
-            flex-direction: column;
-            min-width: 150px;
-        }
-
-        .filter-item label {
-            font-weight: bold;
-            margin-bottom: 0.5rem;
-        }
-
-        select, button {
-            padding: 0.5rem;
-            border: 1px solid #ddd;
-            border-radius: 5px;
             font-size: 1rem;
         }
 
-        button {
-            background-color: var(--primary-color);
-            color: white;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
+        /* Header Styles */
+        header {
+            background: var(--gradient-bg);
+            color: var(--text-light);
+            padding: 2rem 1rem;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
 
-        button:hover {
-            background-color: var(--highlight-color);
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            text-align: center;
+            position: relative;
+            z-index: 2;
         }
 
-        .tooltip {
+        .header-subtitle {
+            font-size: 1.2rem;
+            margin-top: 0.5rem;
+            opacity: 0.9;
+        }
+
+        .header-accent {
             position: absolute;
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 10px;
-            border-radius: 5px;
-            pointer-events: none;
-            font-size: 14px;
-            z-index: 10;
-        }
-
-        .chart-container {
-            width: 100%;
+            width: 300px;
             height: 300px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            pointer-events: none;
         }
 
-        .tag-cloud {
+        .header-accent-1 {
+            top: -150px;
+            right: -50px;
+        }
+
+        .header-accent-2 {
+            bottom: -200px;
+            left: 10%;
+            width: 200px;
+            height: 200px;
+        }
+
+        .header-stats {
             display: flex;
-            flex-wrap: wrap;
             justify-content: center;
+            gap: 2rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .header-stat {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(5px);
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius);
+            text-align: center;
+            min-width: 180px;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        /* Nav / Filters */
+        .nav-filters {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--card-shadow);
+            padding: 1rem;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            position: sticky;
+            top: 20px;
+            z-index: 10;
+            transition: background-color var(--transition-normal), box-shadow var(--transition-normal);
+        }
+
+        .filter-controls {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            min-width: 160px;
+        }
+
+        .filter-group label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            transition: color var(--transition-normal);
+        }
+
+        .filter-group select, .filter-group button {
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            background: var(--card-bg);
+            color: var(--text-dark);
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+        }
+
+        .filter-group select:hover, .filter-group button:hover {
+            border-color: var(--primary);
+        }
+
+        button.apply-filters {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.5rem 1.25rem;
+            font-weight: 600;
+            align-self: flex-end;
+        }
+
+        button.apply-filters:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            display: flex;
+            align-items: center;
             gap: 0.5rem;
         }
 
-        .tag {
-            padding: 5px 10px;
-            background: var(--secondary-color);
-            border-radius: 20px;
-            display: inline-block;
-            transition: transform 0.3s ease, background-color 0.3s ease;
-            cursor: pointer;
-        }
-
-        .tag:hover {
-            transform: scale(1.05);
-            background-color: var(--primary-color);
-            color: white;
-        }
-
-        .engagement-metrics {
-            display: flex;
-            justify-content: space-around;
-            margin-top: 1rem;
-            text-align: center;
-        }
-
-        .metric {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .metric-value {
-            font-size: 2rem;
-            font-weight: bold;
-            color: var(--primary-color);
-        }
-
-        .metric-label {
+        .theme-toggle-label {
             font-size: 0.9rem;
-            color: #666;
+            font-weight: 600;
+            color: var(--text-dark);
         }
 
-        .timeline {
-            position: relative;
-            margin-top: 2rem;
-            height: 100px;
-        }
-
-        footer {
-            background-color: var(--primary-color);
-            color: white;
-            text-align: center;
-            padding: 1rem 0;
-            margin-top: 3rem;
-        }
-
-        @media (max-width: 768px) {
-            .dashboard {
-                grid-template-columns: 1fr;
-            }
-            .container {
-                padding: 1rem;
-            }
-        }
-        
-        /* Animation for data loading */
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        .fade-in {
-            animation: fadeIn 0.5s ease-in;
-        }
-        
-        /* Toggle switch for dark/light mode */
-        .theme-switch {
-            position: absolute;
-            right: 20px;
-            top: 20px;
-        }
-        
-        .switch {
+        .toggle-switch {
             position: relative;
             display: inline-block;
-            width: 60px;
-            height: 34px;
+            width: 50px;
+            height: 24px;
         }
-        
-        .switch input {
+
+        .toggle-switch input {
             opacity: 0;
             width: 0;
             height: 0;
         }
-        
-        .slider {
+
+        .toggle-slider {
             position: absolute;
             cursor: pointer;
             top: 0;
@@ -243,515 +277,1298 @@
             transition: .4s;
             border-radius: 34px;
         }
-        
-        .slider:before {
+
+        .toggle-slider:before {
             position: absolute;
             content: "";
-            height: 26px;
-            width: 26px;
-            left: 4px;
-            bottom: 4px;
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
             background-color: white;
             transition: .4s;
             border-radius: 50%;
         }
-        
-        input:checked + .slider {
-            background-color: var(--highlight-color);
+
+        input:checked + .toggle-slider {
+            background-color: var(--primary);
         }
-        
-        input:checked + .slider:before {
+
+        input:checked + .toggle-slider:before {
             transform: translateX(26px);
+        }
+
+        /* Dashboard Grid Layout */
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 600px), 1fr));
+            gap: 2rem;
+        }
+
+        /* Card Component */
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--card-shadow);
+            padding: 1.5rem;
+            transition: transform 0.3s ease, background-color var(--transition-normal), box-shadow var(--transition-normal);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.35rem;
+            color: var(--primary);
+            margin: 0;
+            transition: color var(--transition-normal);
+        }
+
+        .card-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-footer {
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(0, 0, 0, 0.08);
+        }
+
+        [data-theme="dark"] .card-footer {
+            border-top-color: rgba(255, 255, 255, 0.08);
+        }
+
+        /* Chart Container */
+        .chart-container {
+            width: 100%;
+            height: 300px;
+            position: relative;
+            margin-bottom: 1rem;
+        }
+
+        /* Insights and Key Findings */
+        .insight {
+            background: linear-gradient(to right, rgba(74, 144, 226, 0.1), rgba(74, 144, 226, 0.05));
+            border-left: 4px solid var(--primary);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 var(--radius) var(--radius) 0;
+            transition: background var(--transition-normal);
+        }
+
+        [data-theme="dark"] .insight {
+            background: linear-gradient(to right, rgba(74, 144, 226, 0.2), rgba(74, 144, 226, 0.05));
+        }
+
+        .insight-title {
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+
+        .insight-content {
+            font-size: 0.95rem;
+        }
+
+        /* Key Metrics Display */
+        .metrics-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .metric-box {
+            flex: 1;
+            min-width: 120px;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            border-radius: var(--radius);
+            color: white;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .metric-box:hover {
+            transform: translateY(-3px);
+        }
+
+        .metric-box-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .metric-box-label {
+            font-size: 0.85rem;
+            opacity: 0.9;
+            margin-top: 0.3rem;
+        }
+
+        /* Engagement Heat Map */
+        .engagement-heatmap {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .heatmap-cell {
+            padding: 1rem 0.5rem;
+            border-radius: var(--radius);
+            color: white;
+            text-align: center;
+            transition: transform 0.3s ease;
+            font-size: 0.95rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .heatmap-cell:hover {
+            transform: scale(1.05);
+        }
+
+        .heatmap-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .heatmap-label {
+            font-size: 0.8rem;
+            opacity: 0.85;
+            line-height: 1.3;
+        }
+
+        /* Tag Cloud */
+        .tag-cloud {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.75rem;
+            padding: 1rem 0;
+        }
+
+        .tag {
+            padding: 0.5rem 1rem;
+            border-radius: 100px;
+            color: white;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            background: var(--primary);
+        }
+
+        .tag:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius);
+            font-size: 0.85rem;
+            z-index: 100;
+            pointer-events: none;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            max-width: 300px;
+        }
+
+        /* Lists */
+        .trend-list {
+            margin: 1rem 0;
+            list-style-type: none;
+        }
+
+        .trend-list li {
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.75rem;
+            border-radius: var(--radius);
+            position: relative;
+            padding-left: 2rem;
+            background: rgba(74, 144, 226, 0.08);
+            transition: background-color var(--transition-normal);
+        }
+
+        .trend-list li:before {
+            content: "↗";
+            position: absolute;
+            left: 0.75rem;
+            color: var(--success);
+            font-weight: bold;
+        }
+
+        .trend-list li.declining:before {
+            content: "↘";
+            color: var(--danger);
+        }
+
+        .trend-list li strong {
+            color: var(--primary);
+        }
+
+        /* Code Snippet Styling */
+        .code-snippet {
+            background: #282c34;
+            color: #abb2bf;
+            padding: 1rem;
+            border-radius: var(--radius);
+            font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+
+        .code-comment {
+            color: #98c379;
+        }
+
+        .code-keyword {
+            color: #c678dd;
+        }
+
+        .code-string {
+            color: #e5c07b;
+        }
+
+        .code-function {
+            color: #61afef;
+        }
+
+        /* Animation Classes */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            h2 {
+                font-size: 1.5rem;
+            }
+            
+            .header-subtitle {
+                font-size: 1rem;
+            }
+            
+            .header-stats {
+                gap: 1rem;
+            }
+            
+            .header-stat {
+                min-width: 140px;
+                padding: 0.75rem;
+            }
+            
+            .stat-value {
+                font-size: 1.5rem;
+            }
+            
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .engagement-heatmap {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .nav-filters {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .filter-controls {
+                flex-direction: column;
+            }
+
+            .chart-container {
+                height: 250px;
+            }
+        }
+
+        /* Footer Styles */
+        footer {
+            background: var(--primary-dark);
+            color: white;
+            padding: 2rem 1rem;
+            text-align: center;
+            margin-top: 3rem;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin: 1rem 0;
+            flex-wrap: wrap;
+        }
+
+        .footer-link {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-link:hover {
+            color: white;
+            text-decoration: underline;
+        }
+
+        .attribution {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        /* Animations for Chart Elements */
+        .bar-enter {
+            opacity: 0;
+            transform: scaleY(0);
+            transform-origin: bottom;
+        }
+
+        .bar-enter-active {
+            opacity: 1;
+            transform: scaleY(1);
+            transition: opacity 500ms, transform 500ms;
+        }
+
+        .line-animation {
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            animation: dash 2s ease-in-out forwards;
+        }
+
+        @keyframes dash {
+            to {
+                stroke-dashoffset: 0;
+            }
         }
     </style>
 </head>
 <body>
     <header>
-        <h1>LinkedIn Data Science Trend Analysis</h1>
-        <p>Analyzing the most popular data science topics on LinkedIn in the last month</p>
-        <div class="theme-switch">
-            <label class="switch">
-                <input type="checkbox" id="theme-toggle">
-                <span class="slider"></span>
-            </label>
+        <div class="header-accent header-accent-1"></div>
+        <div class="header-accent header-accent-2"></div>
+        <div class="header-content">
+            <h1>LinkedIn Data Science Trends</h1>
+            <p class="header-subtitle">Analysis of 2,387 posts from February 9 - March 9, 2025</p>
+            
+            <div class="header-stats">
+                <div class="header-stat">
+                    <div class="stat-value">2,387</div>
+                    <div class="stat-label">Total Posts</div>
+                </div>
+                <div class="header-stat">
+                    <div class="stat-value">1,450</div>
+                    <div class="stat-label">Median Views</div>
+                </div>
+                <div class="header-stat">
+                    <div class="stat-value">48</div>
+                    <div class="stat-label">Median Likes</div>
+                </div>
+                <div class="header-stat">
+                    <div class="stat-value">7</div>
+                    <div class="stat-label">Median Comments</div>
+                </div>
+            </div>
         </div>
     </header>
 
     <div class="container">
-        <div class="filters">
-            <div class="filter-item">
-                <label for="time-period">Time Period</label>
-                <select id="time-period">
-                    <option value="7">Last 7 days</option>
-                    <option value="14">Last 14 days</option>
-                    <option value="30" selected>Last 30 days</option>
-                </select>
+        <div class="nav-filters">
+            <div class="filter-controls">
+                <div class="filter-group">
+                    <label for="time-period">Time Period</label>
+                    <select id="time-period">
+                        <option value="all" selected>All (Feb 9 - Mar 9)</option>
+                        <option value="week1">Week 1 (Feb 9-15)</option>
+                        <option value="week2">Week 2 (Feb 16-22)</option>
+                        <option value="week3">Week 3 (Feb 23-Mar 1)</option>
+                        <option value="week4">Week 4 (Mar 2-9)</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="topic-filter">Topic Category</label>
+                    <select id="topic-filter">
+                        <option value="all" selected>All Topics</option>
+                        <option value="python">Python Ecosystem</option>
+                        <option value="ml">Machine Learning</option>
+                        <option value="sql">SQL Variants</option>
+                        <option value="viz">Visualization Tools</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="engagement-type">Engagement Metric</label>
+                    <select id="engagement-type">
+                        <option value="views" selected>Views</option>
+                        <option value="likes">Likes</option>
+                        <option value="comments">Comments</option>
+                        <option value="shares">Shares per 1k Views</option>
+                    </select>
+                </div>
+                <button class="apply-filters" id="apply-filters">Apply Filters</button>
             </div>
-            <div class="filter-item">
-                <label for="engagement-type">Engagement Metric</label>
-                <select id="engagement-type">
-                    <option value="likes">Likes</option>
-                    <option value="comments">Comments</option>
-                    <option value="shares">Shares</option>
-                    <option value="total" selected>Total Engagement</option>
-                </select>
+            <div class="theme-toggle">
+                <span class="theme-toggle-label">Dark Mode</span>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="theme-toggle">
+                    <span class="toggle-slider"></span>
+                </label>
             </div>
-            <div class="filter-item">
-                <label for="topic-filter">Topic Filter</label>
-                <select id="topic-filter">
-                    <option value="all" selected>All Topics</option>
-                    <option value="python">Python</option>
-                    <option value="sql">SQL</option>
-                    <option value="ml">Machine Learning</option>
-                    <option value="ai">Artificial Intelligence</option>
-                    <option value="datavis">Data Visualization</option>
-                </select>
-            </div>
-            <button id="apply-filters">Apply Filters</button>
         </div>
 
         <div class="dashboard">
+            <!-- Tool Popularity Card -->
             <div class="card">
-                <h2>Most Popular Topics</h2>
-                <div id="topics-chart" class="chart-container"></div>
-            </div>
-            <div class="card">
-                <h2>Posts Over Time</h2>
-                <div id="timeline-chart" class="chart-container"></div>
-            </div>
-            <div class="card">
-                <h2>Engagement Metrics</h2>
-                <div class="engagement-metrics">
-                    <div class="metric">
-                        <div class="metric-value" id="total-posts">584</div>
-                        <div class="metric-label">Total Posts</div>
-                    </div>
-                    <div class="metric">
-                        <div class="metric-value" id="avg-likes">87</div>
-                        <div class="metric-label">Avg. Likes</div>
-                    </div>
-                    <div class="metric">
-                        <div class="metric-value" id="avg-comments">12</div>
-                        <div class="metric-label">Avg. Comments</div>
+                <div class="card-header">
+                    <h2 class="card-title">Tool Popularity</h2>
+                </div>
+                <div class="card-body">
+                    <div id="tool-popularity-chart" class="chart-container"></div>
+                    <div class="insight">
+                        <div class="insight-title">Key Insight</div>
+                        <div class="insight-content">Python ecosystem dominates discussions at 77.1% of all posts, followed by Machine Learning at 62.9%.</div>
                     </div>
                 </div>
-                <div id="engagement-chart" class="chart-container"></div>
             </div>
+
+            <!-- Weekly Trend Analysis Card -->
             <div class="card">
-                <h2>Popular Hashtags</h2>
-                <div id="hashtag-cloud" class="tag-cloud">
-                    <!-- Tags will be added dynamically -->
+                <div class="card-header">
+                    <h2 class="card-title">Weekly Posting Trends</h2>
+                </div>
+                <div class="card-body">
+                    <div id="weekly-trend-chart" class="chart-container"></div>
+                    <div class="insight">
+                        <div class="insight-title">Trend Analysis</div>
+                        <div class="insight-content">Week 3 (Feb 23-Mar 1) saw a 27% surge in Python debugging content correlating with PyCharm 2025.1 release.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Engagement Metrics Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Engagement Analysis</h2>
+                </div>
+                <div class="card-body">
+                    <h3>View-to-Engagement Conversion Rates</h3>
+                    <div class="engagement-heatmap">
+                        <div class="heatmap-cell" style="background: rgba(10, 102, 194, 0.6);">
+                            <div class="heatmap-value">3.4%</div>
+                            <div class="heatmap-label">Python<br>Like Rate</div>
+                        </div>
+                        <div class="heatmap-cell" style="background: rgba(10, 102, 194, 0.8);">
+                            <div class="heatmap-value">4.1%</div>
+                            <div class="heatmap-label">ML<br>Like Rate</div>
+                        </div>
+                        <div class="heatmap-cell" style="background: rgba(10, 102, 194, 0.5);">
+                            <div class="heatmap-value">2.9%</div>
+                            <div class="heatmap-label">SQL<br>Like Rate</div>
+                        </div>
+                        <div class="heatmap-cell" style="background: rgba(10, 102, 194, 0.45);">
+                            <div class="heatmap-value">2.6%</div>
+                            <div class="heatmap-label">Viz<br>Like Rate</div>
+                        </div>
+                        
+                        <div class="heatmap-cell" style="background: rgba(22, 194, 245, 0.6);">
+                            <div class="heatmap-value">0.8%</div>
+                            <div class="heatmap-label">Python<br>Comment Rate</div>
+                        </div>
+                        <div class="heatmap-cell" style="background: rgba(22, 194, 245, 0.8);">
+                            <div class="heatmap-value">1.2%</div>
+                            <div class="heatmap-label">ML<br>Comment Rate</div>
+                        </div>
+                        <div class="heatmap-cell" style="background: rgba(22, 194, 245, 0.5);">
+                            <div class="heatmap-value">0.6%</div>
+                            <div class="heatmap-label">SQL<br>Comment Rate</div>
+                        </div>
+                        <div class="heatmap-cell" style="background: rgba(22, 194, 245, 0.45);">
+                            <div class="heatmap-value">0.5%</div>
+                            <div class="heatmap-label">Viz<br>Comment Rate</div>
+                        </div>
+                    </div>
+                    <div id="engagement-chart" class="chart-container"></div>
+                    <div class="insight">
+                        <div class="insight-title">Content Format Impact</div>
+                        <div class="insight-content">Video posts about AutoML implementations achieved 2.3x more shares than text-based ML content.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Popular Hashtags Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Popular Hashtags</h2>
+                </div>
+                <div class="card-body">
+                    <div id="hashtag-cloud" class="tag-cloud">
+                        <!-- Tags dynamically added by JS -->
+                    </div>
+                    <div class="insight">
+                        <div class="insight-title">Hashtag Strategy</div>
+                        <div class="insight-content">Posts with #MLOps showed 19% higher engagement than those with #MachineLearning.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Emerging Tools Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Emerging & Declining Tools</h2>
+                </div>
+                <div class="card-body">
+                    <h3>Gaining Traction (15-20% MoM Growth)</h3>
+                    <ul class="trend-list">
+                        <li><strong>Dask Parallel Computing</strong>: Mentioned in 12.7% of Python posts, particularly in big data contexts</li>
+                        <li><strong>Julia Language</strong>: 82-exercise tutorials generated 38% more saves than Python equivalents</li>
+                        <li><strong>Real-Time SQL</strong>: MaterializeDB and RisingWave mentions up 41% from January</li>
+                    </ul>
+                    
+                    <h3>Declining Interest</h3>
+                    <ul class="trend-list">
+                        <li class="declining"><strong>Basic Pandas Tutorials</strong>: 22% decrease in engagement</li>
+                        <li class="declining"><strong>Traditional BI Tools</strong>: Tableau mentions down 17% YoY</li>
+                        <li class="declining"><strong>On-Prem Solutions</strong>: 39% fewer posts vs. cloud-native approaches</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Content Optimization Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Content Optimization Tips</h2>
+                </div>
+                <div class="card-body">
+                    <div class="metrics-container">
+                        <div class="metric-box">
+                            <div class="metric-box-value">+63%</div>
+                            <div class="metric-box-label">More Comments with Code Snippets</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="metric-box-value">2.1×</div>
+                            <div class="metric-box-label">More Shares for Career-Focused Content</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="metric-box-value">+27%</div>
+                            <div class="metric-box-label">Higher Views for Morning Posts</div>
+                        </div>
+                    </div>
+                    
+                    <h3>Example High-Engagement Code</h3>
+                    <div class="code-snippet">
+<span class="code-comment"># High-engagement code example</span>
+<span class="code-keyword">import</span> dask.dataframe <span class="code-keyword">as</span> dd
+
+<span class="code-comment"># Parallel loading for big data</span>
+df = dd.<span class="code-function">read_csv</span>(<span class="code-string">'s3://bucket/*.csv'</span>)  
+
+<span class="code-comment"># Efficient group operations</span>
+result = df.<span class="code-function">groupby</span>(<span class="code-string">'category'</span>).<span class="code-function">agg</span>({
+    <span class="code-string">'value'</span>: [<span class="code-string">'mean'</span>, <span class="code-string">'sum'</span>]
+})
+                    </div>
+                    
+                    <div class="insight">
+                        <div class="insight-title">Platform-Specific Tactics</div>
+                        <div class="insight-content">Morning Posts (8-10 AM CET) showed 27% higher view consistency, and content linking tools to career advancement gained 2.1x more shares.</div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <footer>
-        <p>© 2025 LinkedIn Data Science Analysis | Created as a Data Science Project</p>
+        <div class="footer-content">
+            <h3>LinkedIn Data Science Trends Analysis</h3>
+            <p>Based on research of 2,387 posts from February 9 - March 9, 2025</p>
+            
+            <div class="footer-links">
+                <a href="#" class="footer-link">GitHub Repository</a>
+                <a href="#" class="footer-link">Methodology</a>
+                <a href="#" class="footer-link">About</a>
+                <a href="#" class="footer-link">Contact</a>
+            </div>
+            
+            <p class="attribution">© 2025 | Created by [Your Name] as a Data Science Project</p>
+        </div>
     </footer>
 
+    <div class="tooltip" id="tooltip" style="display: none;"></div>
+
     <script>
-        // Sample data - this would be replaced with your actual data from scraping
-        const sampleData = {
+        // Main data from research document
+        const researchData = {
             topics: [
-                { name: "Python", value: 145, percent: 24.8 },
-                { name: "Machine Learning", value: 128, percent: 21.9 },
-                { name: "Data Visualization", value: 87, percent: 14.9 },
-                { name: "SQL", value: 76, percent: 13.0 },
-                { name: "Artificial Intelligence", value: 67, percent: 11.5 },
-                { name: "Big Data", value: 45, percent: 7.7 },
-                { name: "Statistics", value: 36, percent: 6.2 }
+                { name: "Python Ecosystem", value: 1842, percent: 77.1, views: 1672 },
+                { name: "Machine Learning", value: 1503, percent: 62.9, views: 1891 },
+                { name: "SQL Variants", value: 897, percent: 37.5, views: 1329 },
+                { name: "Visualization Tools", value: 643, percent: 26.9, views: 1245 }
             ],
-            timeline: Array.from({ length: 30 }, (_, i) => ({
-                day: i + 1,
-                count: Math.floor(Math.random() * 30) + 10
-            })),
+            weeklyTrends: [
+                { week: 1, label: "Feb 9-15", count: 567, python: 432, ml: 388, sql: 201, viz: 142 },
+                { week: 2, label: "Feb 16-22", count: 598, python: 458, ml: 375, sql: 221, viz: 156 },
+                { week: 3, label: "Feb 23-Mar 1", count: 642, python: 502, ml: 392, sql: 232, viz: 172 },
+                { week: 4, label: "Mar 2-9", count: 580, python: 450, ml: 348, sql: 243, viz: 173 }
+            ],
             hashtags: [
-                { text: "#datascience", size: 45, count: 203 },
-                { text: "#python", size: 40, count: 187 },
-                { text: "#machinelearning", size: 38, count: 174 },
-                { text: "#ai", size: 35, count: 156 },
-                { text: "#dataanalysis", size: 32, count: 143 },
-                { text: "#dataviz", size: 30, count: 132 },
-                { text: "#bigdata", size: 28, count: 124 },
-                { text: "#sql", size: 25, count: 112 },
-                { text: "#deeplearning", size: 23, count: 102 },
-                { text: "#pandas", size: 20, count: 89 },
-                { text: "#statistics", size: 18, count: 81 },
-                { text: "#analytics", size: 17, count: 75 },
-                { text: "#dataanalytics", size: 16, count: 71 },
-                { text: "#nlp", size: 15, count: 67 },
-                { text: "#tableau", size: 14, count: 63 }
+                { text: "#datascience", size: 45, count: 1894 },
+                { text: "#python", size: 40, count: 1047 },
+                { text: "#machinelearning", size: 38, count: 982 },
+                { text: "#ai", size: 36, count: 875 },
+                { text: "#dataanalysis", size: 34, count: 762 },
+                { text: "#mlops", size: 32, count: 583 },
+                { text: "#deeplearning", size: 30, count: 524 },
+                { text: "#bigdata", size: 28, count: 487 },
+                { text: "#sql", size: 27, count: 463 },
+                { text: "#analytics", size: 25, count: 412 },
+                { text: "#pytorch", size: 23, count: 387 },
+                { text: "#tensorflow", size: 22, count: 342 },
+                { text: "#dataviz", size: 20, count: 312 },
+                { text: "#pandas", size: 19, count: 289 },
+                { text: "#cloudcomputing", size: 18, count: 272 },
+                { text: "#llm", size: 17, count: 251 },
+                { text: "#dataengineering", size: 16, count: 234 },
+                { text: "#career", size: 15, count: 218 },
+                { text: "#nlp", size: 14, count: 193 },
+                { text: "#dask", size: 13, count: 168 }
             ],
             engagement: {
-                likes: 50834,
-                comments: 7012,
-                shares: 12467
+                sharesPerThousandViews: {
+                    python: 14.2,
+                    ml: 18.7,
+                    sql: 9.8,
+                    viz: 7.4
+                }
             }
         };
 
-        // Initialize D3 charts
+        // Initialize the dashboard on DOM content loaded
         document.addEventListener('DOMContentLoaded', function() {
-            // Create topic bar chart
-            createTopicChart();
-            
-            // Create timeline chart
-            createTimelineChart();
-            
-            // Create engagement chart
+            // Create all charts
+            createToolPopularityChart();
+            createWeeklyTrendChart();
             createEngagementChart();
-            
-            // Create hashtag cloud
             createHashtagCloud();
             
-            // Setup event listeners
-            document.getElementById('apply-filters').addEventListener('click', updateVisualizations);
+            // Set up event listeners
             document.getElementById('theme-toggle').addEventListener('change', toggleTheme);
+            document.getElementById('apply-filters').addEventListener('click', applyFilters);
+            
+            // Initial animations for cards
+            animateCards();
         });
 
-        function createTopicChart() {
-            // Clear any existing chart
-            d3.select("#topics-chart").html("");
-            
-            // Setup dimensions
-            const width = document.getElementById('topics-chart').clientWidth;
-            const height = 300;
+        // Animate cards on initial load
+        function animateCards() {
+            const cards = document.querySelectorAll('.card');
+            cards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.classList.add('animate-fade-in');
+                }, index * 100);
+            });
+        }
+
+        // Tool Popularity Chart
+        function createToolPopularityChart() {
+            const chartContainer = document.getElementById('tool-popularity-chart');
+            const width = chartContainer.clientWidth;
+            const height = chartContainer.clientHeight || 300;
             const margin = { top: 20, right: 30, bottom: 60, left: 60 };
             const innerWidth = width - margin.left - margin.right;
             const innerHeight = height - margin.top - margin.bottom;
             
+            // Clear any existing content
+            chartContainer.innerHTML = '';
+            
             // Create SVG
-            const svg = d3.select("#topics-chart")
-                .append("svg")
-                .attr("width", width)
-                .attr("height", height);
+            const svg = d3.select(chartContainer)
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height);
                 
-            const g = svg.append("g")
-                .attr("transform", `translate(${margin.left},${margin.top})`);
+            const g = svg.append('g')
+                .attr('transform', `translate(${margin.left},${margin.top})`);
                 
             // Create scales
             const xScale = d3.scaleBand()
-                .domain(sampleData.topics.map(d => d.name))
+                .domain(researchData.topics.map(d => d.name))
                 .range([0, innerWidth])
-                .padding(0.2);
+                .padding(0.3);
                 
             const yScale = d3.scaleLinear()
-                .domain([0, d3.max(sampleData.topics, d => d.value) * 1.1])
+                .domain([0, d3.max(researchData.topics, d => d.percent) * 1.1])
                 .range([innerHeight, 0]);
                 
+            // Create color scale
+            const colorScale = d3.scaleOrdinal()
+                .domain(researchData.topics.map(d => d.name))
+                .range(['#4a90e2', '#50e3c2', '#b678c4', '#f7c244']);
+                
             // Create axes
-            g.append("g")
-                .attr("transform", `translate(0,${innerHeight})`)
+            g.append('g')
+                .attr('transform', `translate(0,${innerHeight})`)
                 .call(d3.axisBottom(xScale))
-                .selectAll("text")
-                .attr("transform", "rotate(-45)")
-                .style("text-anchor", "end")
-                .attr("dx", "-.8em")
-                .attr("dy", ".15em");
+                .selectAll('text')
+                .attr('transform', 'rotate(-25)')
+                .style('text-anchor', 'end')
+                .attr('dx', '-.8em')
+                .attr('dy', '.15em')
+                .style('font-size', '12px');
                 
-            g.append("g")
-                .call(d3.axisLeft(yScale));
-                
-            // Create bars
-            g.selectAll(".bar")
-                .data(sampleData.topics)
-                .enter()
-                .append("rect")
-                .attr("class", "bar")
-                .attr("x", d => xScale(d.name))
-                .attr("y", d => yScale(d.value))
-                .attr("width", xScale.bandwidth())
-                .attr("height", d => innerHeight - yScale(d.value))
-                .attr("fill", (d, i) => {
-                    const colors = ["var(--chart-color-1)", "var(--chart-color-2)", "var(--chart-color-3)", 
-                                    "var(--chart-color-4)", "var(--chart-color-5)"];
-                    return colors[i % colors.length];
-                })
-                .on("mouseover", function(event, d) {
-                    showTooltip(event, `${d.name}: ${d.value} posts (${d.percent}%)`);
-                    d3.select(this).attr("opacity", 0.8);
-                })
-                .on("mouseout", function() {
-                    hideTooltip();
-                    d3.select(this).attr("opacity", 1);
-                });
-                
-            // Add title
-            g.append("text")
-                .attr("class", "chart-title")
-                .attr("x", innerWidth / 2)
-                .attr("y", -5)
-                .attr("text-anchor", "middle")
-                .text("Number of Posts by Topic");
+            g.append('g')
+                .call(d3.axisLeft(yScale).tickFormat(d => d + '%'))
+                .style('font-size', '12px');
                 
             // Add y-axis label
-            g.append("text")
-                .attr("transform", "rotate(-90)")
-                .attr("y", -40)
-                .attr("x", -innerHeight / 2)
-                .attr("text-anchor", "middle")
-                .text("Number of Posts");
+            g.append('text')
+                .attr('transform', 'rotate(-90)')
+                .attr('y', -45)
+                .attr('x', -innerHeight / 2)
+                .attr('text-anchor', 'middle')
+                .text('Percentage of Posts')
+                .style('font-size', '12px');
+                
+            // Create gradient definitions
+            const defs = svg.append('defs');
+            
+            researchData.topics.forEach((topic, i) => {
+                const gradientId = `bar-gradient-${i}`;
+                const gradient = defs.append('linearGradient')
+                    .attr('id', gradientId)
+                    .attr('x1', '0%')
+                    .attr('y1', '0%')
+                    .attr('x2', '0%')
+                    .attr('y2', '100%');
+                    
+                gradient.append('stop')
+                    .attr('offset', '0%')
+                    .attr('stop-color', d3.rgb(colorScale(topic.name)).brighter(0.5))
+                    
+                gradient.append('stop')
+                    .attr('offset', '100%')
+                    .attr('stop-color', colorScale(topic.name));
+            });
+            
+            // Create bars with animation
+            const bars = g.selectAll('.bar')
+                .data(researchData.topics)
+                .enter()
+                .append('rect')
+                .attr('class', 'bar bar-enter')
+                .attr('x', d => xScale(d.name))
+                .attr('width', xScale.bandwidth())
+                .attr('y', innerHeight)
+                .attr('height', 0)
+                .attr('fill', (d, i) => `url(#bar-gradient-${i})`)
+                .attr('rx', 4)
+                .on('mouseover', function(event, d) {
+                    showTooltip(event, `<strong>${d.name}</strong><br>${d.value} mentions (${d.percent}%)<br>Avg. Views per Mention: ${d.views}`);
+                    d3.select(this).attr('opacity', 0.8);
+                })
+                .on('mouseout', function() {
+                    hideTooltip();
+                    d3.select(this).attr('opacity', 1);
+                });
+                
+            // Animate bars
+            bars.transition()
+                .duration(1000)
+                .delay((d, i) => i * 100)
+                .attr('y', d => yScale(d.percent))
+                .attr('height', d => innerHeight - yScale(d.percent));
+                
+            // Add value labels on top of bars
+            g.selectAll('.bar-label')
+                .data(researchData.topics)
+                .enter()
+                .append('text')
+                .attr('class', 'bar-label')
+                .attr('x', d => xScale(d.name) + xScale.bandwidth() / 2)
+                .attr('y', d => yScale(d.percent) - 5)
+                .attr('text-anchor', 'middle')
+                .text(d => d.percent + '%')
+                .style('font-size', '12px')
+                .style('font-weight', 'bold')
+                .style('opacity', 0)
+                .transition()
+                .duration(1000)
+                .delay((d, i) => i * 100 + 500)
+                .style('opacity', 1);
         }
 
-        function createTimelineChart() {
-            // Clear any existing chart
-            d3.select("#timeline-chart").html("");
+        // Weekly Trend Chart
+        function createWeeklyTrendChart() {
+            const chartContainer = document.getElementById('weekly-trend-chart');
+            const width = chartContainer.clientWidth;
+            const height = chartContainer.clientHeight || 300;
+            const margin = { top: 20, right: 60, bottom: 40, left: 50 };
+            const innerWidth = width - margin.left - margin.right;
+            const innerHeight = height - margin.top - margin.bottom;
             
-            // Setup dimensions
-            const width = document.getElementById('timeline-chart').clientWidth;
-            const height = 300;
+            // Clear any existing content
+            chartContainer.innerHTML = '';
+            
+            // Create SVG
+            const svg = d3.select(chartContainer)
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height);
+                
+            const g = svg.append('g')
+                .attr('transform', `translate(${margin.left},${margin.top})`);
+                
+            // Create scales
+            const xScale = d3.scaleBand()
+                .domain(researchData.weeklyTrends.map(d => d.label))
+                .range([0, innerWidth])
+                .padding(0.1);
+                
+            const yScale = d3.scaleLinear()
+                .domain([0, d3.max(researchData.weeklyTrends, d => d.count) * 1.1])
+                .range([innerHeight, 0]);
+                
+            // Create line generator for each tool
+            const lineGenerator = d3.line()
+                .x(d => xScale(d.label) + xScale.bandwidth() / 2)
+                .y(d => yScale(d.count))
+                .curve(d3.curveMonotoneX);
+                
+            const pythonLine = d3.line()
+                .x(d => xScale(d.label) + xScale.bandwidth() / 2)
+                .y(d => yScale(d.python))
+                .curve(d3.curveMonotoneX);
+                
+            const mlLine = d3.line()
+                .x(d => xScale(d.label) + xScale.bandwidth() / 2)
+                .y(d => yScale(d.ml))
+                .curve(d3.curveMonotoneX);
+                
+            const sqlLine = d3.line()
+                .x(d => xScale(d.label) + xScale.bandwidth() / 2)
+                .y(d => yScale(d.sql))
+                .curve(d3.curveMonotoneX);
+                
+            // Create axes
+            g.append('g')
+                .attr('transform', `translate(0,${innerHeight})`)
+                .call(d3.axisBottom(xScale))
+                .style('font-size', '12px');
+                
+            g.append('g')
+                .call(d3.axisLeft(yScale))
+                .style('font-size', '12px');
+                
+            // Add y-axis label
+            g.append('text')
+                .attr('transform', 'rotate(-90)')
+                .attr('y', -40)
+                .attr('x', -innerHeight / 2)
+                .attr('text-anchor', 'middle')
+                .text('Number of Posts')
+                .style('font-size', '12px');
+                
+            // Add total posts bars
+            g.selectAll('.week-bar')
+                .data(researchData.weeklyTrends)
+                .enter()
+                .append('rect')
+                .attr('class', 'week-bar')
+                .attr('x', d => xScale(d.label))
+                .attr('width', xScale.bandwidth())
+                .attr('y', d => yScale(d.count))
+                .attr('height', d => innerHeight - yScale(d.count))
+                .attr('fill', 'rgba(74, 144, 226, 0.2)')
+                .attr('rx', 3)
+                .on('mouseover', function(event, d) {
+                    showTooltip(event, `<strong>${d.label}</strong><br>Total Posts: ${d.count}<br>Python: ${d.python}<br>ML: ${d.ml}<br>SQL: ${d.sql}<br>Viz: ${d.viz}`);
+                    d3.select(this).attr('fill', 'rgba(74, 144, 226, 0.3)');
+                })
+                .on('mouseout', function() {
+                    hideTooltip();
+                    d3.select(this).attr('fill', 'rgba(74, 144, 226, 0.2)');
+                });
+                
+            // Add lines for each tool category
+            const toolCategories = [
+                { name: 'Python', accessor: 'python', color: '#4a90e2', lineFunc: pythonLine },
+                { name: 'ML', accessor: 'ml', color: '#50e3c2', lineFunc: mlLine },
+                { name: 'SQL', accessor: 'sql', color: '#b678c4', lineFunc: sqlLine }
+            ];
+            
+            toolCategories.forEach(category => {
+                // Add the line
+                g.append('path')
+                    .datum(researchData.weeklyTrends)
+                    .attr('fill', 'none')
+                    .attr('stroke', category.color)
+                    .attr('stroke-width', 3)
+                    .attr('d', category.lineFunc)
+                    .attr('class', 'line-animation');
+                    
+                // Add dots for each data point
+                g.selectAll(`.dot-${category.accessor}`)
+                    .data(researchData.weeklyTrends)
+                    .enter()
+                    .append('circle')
+                    .attr('class', `dot-${category.accessor}`)
+                    .attr('cx', d => xScale(d.label) + xScale.bandwidth() / 2)
+                    .attr('cy', d => yScale(d[category.accessor]))
+                    .attr('r', 5)
+                    .attr('fill', category.color)
+                    .attr('stroke', '#fff')
+                    .attr('stroke-width', 2)
+                    .on('mouseover', function(event, d) {
+                        showTooltip(event, `<strong>${category.name}</strong>: ${d[category.accessor]} posts<br>Week: ${d.label}`);
+                        d3.select(this).attr('r', 7);
+                    })
+                    .on('mouseout', function() {
+                        hideTooltip();
+                        d3.select(this).attr('r', 5);
+                    });
+            });
+            
+            // Add legend
+            const legend = g.append('g')
+                .attr('transform', `translate(${innerWidth - 100}, 10)`);
+                
+            toolCategories.forEach((category, i) => {
+                const legendRow = legend.append('g')
+                    .attr('transform', `translate(0, ${i * 20})`);
+                    
+                legendRow.append('rect')
+                    .attr('width', 10)
+                    .attr('height', 10)
+                    .attr('fill', category.color);
+                    
+                legendRow.append('text')
+                    .attr('x', 15)
+                    .attr('y', 10)
+                    .attr('text-anchor', 'start')
+                    .style('font-size', '12px')
+                    .text(category.name);
+            });
+        }
+
+        // Engagement Chart
+        function createEngagementChart() {
+            const chartContainer = document.getElementById('engagement-chart');
+            const width = chartContainer.clientWidth;
+            const height = chartContainer.clientHeight || 300;
             const margin = { top: 20, right: 30, bottom: 40, left: 50 };
             const innerWidth = width - margin.left - margin.right;
             const innerHeight = height - margin.top - margin.bottom;
             
+            // Clear any existing content
+            chartContainer.innerHTML = '';
+            
             // Create SVG
-            const svg = d3.select("#timeline-chart")
-                .append("svg")
-                .attr("width", width)
-                .attr("height", height);
+            const svg = d3.select(chartContainer)
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height);
                 
-            const g = svg.append("g")
-                .attr("transform", `translate(${margin.left},${margin.top})`);
+            const g = svg.append('g')
+                .attr('transform', `translate(${margin.left},${margin.top})`);
                 
-            // Create scales
-            const xScale = d3.scaleLinear()
-                .domain([1, 30])
-                .range([0, innerWidth]);
-                
-            const yScale = d3.scaleLinear()
-                .domain([0, d3.max(sampleData.timeline, d => d.count) * 1.1])
-                .range([innerHeight, 0]);
-                
-            // Create line generator
-            const line = d3.line()
-                .x(d => xScale(d.day))
-                .y(d => yScale(d.count))
-                .curve(d3.curveMonotoneX);
-                
-            // Create axes
-            g.append("g")
-                .attr("transform", `translate(0,${innerHeight})`)
-                .call(d3.axisBottom(xScale).ticks(10).tickFormat(d => `Day ${d}`));
-                
-            g.append("g")
-                .call(d3.axisLeft(yScale));
-                
-            // Add line path
-            g.append("path")
-                .datum(sampleData.timeline)
-                .attr("fill", "none")
-                .attr("stroke", "var(--chart-color-1)")
-                .attr("stroke-width", 2)
-                .attr("d", line);
-                
-            // Add dots
-            g.selectAll(".dot")
-                .data(sampleData.timeline)
-                .enter()
-                .append("circle")
-                .attr("class", "dot")
-                .attr("cx", d => xScale(d.day))
-                .attr("cy", d => yScale(d.count))
-                .attr("r", 4)
-                .attr("fill", "var(--chart-color-1)")
-                .on("mouseover", function(event, d) {
-                    showTooltip(event, `Day ${d.day}: ${d.count} posts`);
-                    d3.select(this).attr("r", 6);
-                })
-                .on("mouseout", function() {
-                    hideTooltip();
-                    d3.select(this).attr("r", 4);
-                });
-                
-            // Add title
-            g.append("text")
-                .attr("class", "chart-title")
-                .attr("x", innerWidth / 2)
-                .attr("y", -5)
-                .attr("text-anchor", "middle")
-                .text("Posts Per Day (Last 30 Days)");
-                
-            // Add y-axis label
-            g.append("text")
-                .attr("transform", "rotate(-90)")
-                .attr("y", -40)
-                .attr("x", -innerHeight / 2)
-                .attr("text-anchor", "middle")
-                .text("Number of Posts");
-        }
-
-        function createEngagementChart() {
-            // Clear any existing chart
-            d3.select("#engagement-chart").html("");
-            
-            // Setup dimensions
-            const width = document.getElementById('engagement-chart').clientWidth;
-            const height = 200;
-            const margin = { top: 20, right: 30, bottom: 40, left: 60 };
-            const innerWidth = width - margin.left - margin.right;
-            const innerHeight = height - margin.top - margin.bottom;
-            
-            // Create data for pie chart
-            const data = [
-                { name: "Likes", value: sampleData.engagement.likes },
-                { name: "Comments", value: sampleData.engagement.comments },
-                { name: "Shares", value: sampleData.engagement.shares }
+            // Prepare data for bar chart
+            const sharesData = [
+                { category: 'Python', value: researchData.engagement.sharesPerThousandViews.python },
+                { category: 'ML', value: researchData.engagement.sharesPerThousandViews.ml },
+                { category: 'SQL', value: researchData.engagement.sharesPerThousandViews.sql },
+                { category: 'Viz', value: researchData.engagement.sharesPerThousandViews.viz }
             ];
             
-            // Create SVG
-            const svg = d3.select("#engagement-chart")
-                .append("svg")
-                .attr("width", width)
-                .attr("height", height);
+            // Create scales
+            const xScale = d3.scaleBand()
+                .domain(sharesData.map(d => d.category))
+                .range([0, innerWidth])
+                .padding(0.3);
                 
-            const g = svg.append("g")
-                .attr("transform", `translate(${width / 2},${height / 2})`);
+            const yScale = d3.scaleLinear()
+                .domain([0, d3.max(sharesData, d => d.value) * 1.1])
+                .range([innerHeight, 0]);
                 
-            // Create pie chart
-            const pie = d3.pie()
-                .value(d => d.value)
-                .sort(null);
+            // Create color scale
+            const colorScale = d3.scaleOrdinal()
+                .domain(sharesData.map(d => d.category))
+                .range(['#4a90e2', '#50e3c2', '#b678c4', '#f7c244']);
                 
-            const arc = d3.arc()
-                .innerRadius(50)
-                .outerRadius(Math.min(width, height) / 2 - 20);
+            // Create axes
+            g.append('g')
+                .attr('transform', `translate(0,${innerHeight})`)
+                .call(d3.axisBottom(xScale))
+                .style('font-size', '12px');
                 
-            const color = d3.scaleOrdinal()
-                .domain(data.map(d => d.name))
-                .range(["var(--chart-color-1)", "var(--chart-color-2)", "var(--chart-color-3)"]);
+            g.append('g')
+                .call(d3.axisLeft(yScale))
+                .style('font-size', '12px');
                 
-            // Add arcs
-            const arcs = g.selectAll(".arc")
-                .data(pie(data))
+            // Add title and y-axis label
+            g.append('text')
+                .attr('y', -5)
+                .attr('x', innerWidth / 2)
+                .attr('text-anchor', 'middle')
+                .text('Shares per 1,000 Views')
+                .style('font-size', '14px')
+                .style('font-weight', 'bold');
+                
+            g.append('text')
+                .attr('transform', 'rotate(-90)')
+                .attr('y', -40)
+                .attr('x', -innerHeight / 2)
+                .attr('text-anchor', 'middle')
+                .text('Shares per 1k Views')
+                .style('font-size', '12px');
+                
+            // Create gradient definitions
+            const defs = svg.append('defs');
+            
+            sharesData.forEach((item, i) => {
+                const gradientId = `share-gradient-${i}`;
+                const gradient = defs.append('linearGradient')
+                    .attr('id', gradientId)
+                    .attr('x1', '0%')
+                    .attr('y1', '0%')
+                    .attr('x2', '0%')
+                    .attr('y2', '100%');
+                    
+                gradient.append('stop')
+                    .attr('offset', '0%')
+                    .attr('stop-color', d3.rgb(colorScale(item.category)).brighter(0.5))
+                    
+                gradient.append('stop')
+                    .attr('offset', '100%')
+                    .attr('stop-color', colorScale(item.category));
+            });
+            
+            // Create bars with animation
+            const bars = g.selectAll('.share-bar')
+                .data(sharesData)
                 .enter()
-                .append("g")
-                .attr("class", "arc");
-                
-            arcs.append("path")
-                .attr("d", arc)
-                .attr("fill", d => color(d.data.name))
-                .attr("stroke", "white")
-                .style("stroke-width", "2px")
-                .on("mouseover", function(event, d) {
-                    const percent = ((d.data.value / (sampleData.engagement.likes + sampleData.engagement.comments + sampleData.engagement.shares)) * 100).toFixed(1);
-                    showTooltip(event, `${d.data.name}: ${d.data.value.toLocaleString()} (${percent}%)`);
-                    d3.select(this).attr("opacity", 0.8);
+                .append('rect')
+                .attr('class', 'share-bar')
+                .attr('x', d => xScale(d.category))
+                .attr('width', xScale.bandwidth())
+                .attr('y', innerHeight)
+                .attr('height', 0)
+                .attr('fill', (d, i) => `url(#share-gradient-${i})`)
+                .attr('rx', 4)
+                .on('mouseover', function(event, d) {
+                    showTooltip(event, `<strong>${d.category}</strong><br>Shares per 1,000 Views: ${d.value}`);
+                    d3.select(this).attr('opacity', 0.8);
                 })
-                .on("mouseout", function() {
+                .on('mouseout', function() {
                     hideTooltip();
-                    d3.select(this).attr("opacity", 1);
+                    d3.select(this).attr('opacity', 1);
                 });
                 
-            // Add labels
-            const label = d3.arc()
-                .innerRadius(arc.outerRadius()() * 0.8)
-                .outerRadius(arc.outerRadius()() * 0.8);
+            // Animate bars
+            bars.transition()
+                .duration(1000)
+                .delay((d, i) => i * 100)
+                .attr('y', d => yScale(d.value))
+                .attr('height', d => innerHeight - yScale(d.value));
                 
-            arcs.append("text")
-                .attr("transform", d => `translate(${label.centroid(d)})`)
-                .attr("dy", "0.35em")
-                .attr("text-anchor", "middle")
-                .attr("fill", "white")
-                .style("font-size", "12px")
-                .text(d => {
-                    const percent = ((d.data.value / (sampleData.engagement.likes + sampleData.engagement.comments + sampleData.engagement.shares)) * 100).toFixed(0);
-                    return `${percent}%`;
-                });
+            // Add value labels on top of bars
+            g.selectAll('.share-bar-label')
+                .data(sharesData)
+                .enter()
+                .append('text')
+                .attr('class', 'share-bar-label')
+                .attr('x', d => xScale(d.category) + xScale.bandwidth() / 2)
+                .attr('y', d => yScale(d.value) - 5)
+                .attr('text-anchor', 'middle')
+                .text(d => d.value)
+                .style('font-size', '12px')
+                .style('font-weight', 'bold')
+                .style('opacity', 0)
+                .transition()
+                .duration(1000)
+                .delay((d, i) => i * 100 + 500)
+                .style('opacity', 1);
         }
 
+        // Hashtag Cloud
         function createHashtagCloud() {
-            const container = document.getElementById("hashtag-cloud");
-            container.innerHTML = "";
+            const container = document.getElementById('hashtag-cloud');
+            container.innerHTML = '';
             
-            sampleData.hashtags.forEach(tag => {
-                const tagEl = document.createElement("div");
-                tagEl.className = "tag";
+            // Sort hashtags by count
+            const sortedHashtags = [...researchData.hashtags].sort((a, b) => b.count - a.count);
+            
+            // Generate a color scale
+            const colorScale = d3.scaleOrdinal()
+                .domain(Array.from({ length: sortedHashtags.length }, (_, i) => i))
+                .range([
+                    '#4a90e2', '#50e3c2', '#b678c4', '#f7c244', 
+                    '#ff6b6b', '#48dbfb', '#1dd1a1', '#5f27cd', 
+                    '#ff9ff3', '#00d2d3', '#7C9ED9', '#EFC958', 
+                    '#B8C5D6', '#8795A1', '#FF5A5F', '#007AFF'
+                ]);
+            
+            // Create each tag element
+            sortedHashtags.forEach((tag, i) => {
+                const tagEl = document.createElement('div');
+                tagEl.className = 'tag';
                 tagEl.textContent = tag.text;
                 tagEl.style.fontSize = `${tag.size / 10 + 0.8}rem`;
+                tagEl.style.backgroundColor = colorScale(i);
                 
-                tagEl.addEventListener("mouseover", function(event) {
+                // Add animation delay based on index
+                tagEl.style.opacity = '0';
+                tagEl.style.transform = 'scale(0.5)';
+                tagEl.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                
+                // Event listeners for tooltip
+                tagEl.addEventListener('mouseover', function(event) {
                     showTooltip(event, `${tag.text}: ${tag.count} mentions`);
                 });
                 
-                tagEl.addEventListener("mouseout", function() {
+                tagEl.addEventListener('mouseout', function() {
                     hideTooltip();
                 });
                 
                 container.appendChild(tagEl);
+                
+                // Trigger animation after a slight delay
+                setTimeout(() => {
+                    tagEl.style.opacity = '1';
+                    tagEl.style.transform = 'scale(1)';
+                }, i * 30);
             });
         }
 
-        // Tooltip functions
-        function showTooltip(event, text) {
-            let tooltip = document.querySelector(".tooltip");
+        // Tooltip handling
+        function showTooltip(event, content) {
+            const tooltip = document.getElementById('tooltip');
+            tooltip.innerHTML = content;
+            tooltip.style.display = 'block';
+            tooltip.style.opacity = '0';
             
-            if (!tooltip) {
-                tooltip = document.createElement("div");
-                tooltip.className = "tooltip";
-                document.body.appendChild(tooltip);
-            }
+            const x = event.pageX + 10;
+            const y = event.pageY + 10;
             
-            tooltip.innerHTML = text;
-            tooltip.style.left = (event.pageX + 10) + "px";
-            tooltip.style.top = (event.pageY + 10) + "px";
-            tooltip.style.display = "block";
+            tooltip.style.left = `${x}px`;
+            tooltip.style.top = `${y}px`;
+            
+            // Fade in
+            setTimeout(() => {
+                tooltip.style.opacity = '1';
+            }, 10);
         }
 
         function hideTooltip() {
-            const tooltip = document.querySelector(".tooltip");
-            if (tooltip) {
-                tooltip.style.display = "none";
-            }
+            const tooltip = document.getElementById('tooltip');
+            tooltip.style.opacity = '0';
+            
+            // Remove from DOM after fade out
+            setTimeout(() => {
+                tooltip.style.display = 'none';
+            }, 200);
         }
 
-        // Update visualizations based on filters
-        function updateVisualizations() {
-            // In a real application, this would fetch new data based on the filters
-            // For this demo, we'll just recreate the charts with the same data
-            createTopicChart();
-            createTimelineChart();
-            createEngagementChart();
-            
-            // Simulate data loading
-            const dashboard = document.querySelector(".dashboard");
-            dashboard.classList.remove("fade-in");
-            void dashboard.offsetWidth; // Trigger reflow
-            dashboard.classList.add("fade-in");
-            
-            // Show a message that filters were applied
-            alert("Filters applied! In a real application, this would fetch new data based on your selection.");
-        }
-
-        // Toggle dark/light theme
+        // Theme toggle
         function toggleTheme() {
-            const isDark = document.getElementById('theme-toggle').checked;
+            const isDarkMode = document.getElementById('theme-toggle').checked;
             
-            if (isDark) {
-                document.documentElement.style.setProperty('--secondary-color', '#1c1c1c');
-                document.documentElement.style.setProperty('--text-color', '#f5f5f5');
-                document.body.style.backgroundColor = '#1c1c1c';
-                document.querySelectorAll('.card').forEach(card => {
-                    card.style.backgroundColor = '#2d2d2d';
-                    card.style.color = '#f5f5f5';
-                });
-                document.querySelector('.filters').style.backgroundColor = '#2d2d2d';
-                document.querySelector('.filters').style.color = '#f5f5f5';
+            if (isDarkMode) {
+                document.body.setAttribute('data-theme', 'dark');
             } else {
-                document.documentElement.style.setProperty('--secondary-color', '#f5f5f5');
-                document.documentElement.style.setProperty('--text-color', '#333');
-                document.body.style.backgroundColor = '#f5f5f5';
-                document.querySelectorAll('.card').forEach(card => {
-                    card.style.backgroundColor = 'white';
-                    card.style.color = '#333';
-                });
-                document.querySelector('.filters').style.backgroundColor = 'white';
-                document.querySelector('.filters').style.color = '#333';
+                document.body.removeAttribute('data-theme');
             }
             
-            // Redraw charts with new theme
-            createTopicChart();
-            createTimelineChart();
+            // Redraw charts to update colors
+            createToolPopularityChart();
+            createWeeklyTrendChart();
             createEngagementChart();
+        }
+
+        // Apply filters
+        function applyFilters() {
+            const period = document.getElementById('time-period').value;
+            const topic = document.getElementById('topic-filter').value;
+            const engagement = document.getElementById('engagement-type').value;
+            
+            // Show "loading" state
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => {
+                card.style.opacity = '0.7';
+            });
+            
+            // Simulate data processing
+            setTimeout(() => {
+                // Restore cards and show a message
+                cards.forEach(card => {
+                    card.style.opacity = '1';
+                });
+                
+                // Redraw charts
+                createToolPopularityChart();
+                createWeeklyTrendChart();
+                createEngagementChart();
+                createHashtagCloud();
+                
+                // In a real implementation, you would filter the data here
+                alert(`Filters applied:\nPeriod: ${period}\nTopic: ${topic}\nEngagement: ${engagement}\n\nIn a production environment, this would update the visualization with filtered data.`);
+            }, 800);
+        }
+
+        // Handle resize events to make charts responsive
+        window.addEventListener('resize', debounce(function() {
+            createToolPopularityChart();
+            createWeeklyTrendChart();
+            createEngagementChart();
+        }, 250));
+
+        // Debounce function for resize events
+        function debounce(func, wait) {
+            let timeout;
+            return function() {
+                const context = this;
+                const args = arguments;
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(context, args), wait);
+            };
         }
     </script>
 </body>
