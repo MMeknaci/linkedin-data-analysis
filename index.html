@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LinkedIn Data Science Trends - Interactive Infographic</title>
+    <title>LinkedIn Data Science Trends - February-March 2025</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
     <style>
         /* Color Variables and Root Styling */
@@ -13,7 +13,6 @@
             --primary-dark: #0e4f8b;
             --secondary: #16c2f5;
             --accent: #6b4ce6;
-            --accent-light: #9277ff;
             --text-dark: #2e3b4e;
             --text-light: #f8fafc;
             --background: #f0f4f8;
@@ -34,7 +33,6 @@
             --primary-dark: #2c5282;
             --secondary: #00b5e2;
             --accent: #9277ff;
-            --accent-light: #b69eff;
             --text-dark: #e2e8f0;
             --text-light: #f8fafc;
             --background: #121826;
@@ -173,78 +171,13 @@
             padding: 2rem 1.5rem;
         }
 
-        /* Nav / Filters */
-        .nav-filters {
-            background: var(--card-bg);
-            border-radius: var(--radius);
-            box-shadow: var(--card-shadow);
-            padding: 1rem;
-            margin-bottom: 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 1rem;
-            position: sticky;
-            top: 20px;
-            z-index: 10;
-            transition: background-color var(--transition-normal), box-shadow var(--transition-normal);
-        }
-
-        .filter-controls {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-
-        .filter-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-            min-width: 160px;
-        }
-
-        .filter-group label {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--text-dark);
-            transition: color var(--transition-normal);
-        }
-
-        .filter-group select, .filter-group button {
-            padding: 0.5rem 1rem;
-            border-radius: var(--radius);
-            border: 1px solid rgba(0, 0, 0, 0.1);
-            background: var(--card-bg);
-            color: var(--text-dark);
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: all var(--transition-normal);
-        }
-
-        .filter-group select:hover, .filter-group button:hover {
-            border-color: var(--primary);
-        }
-
-        button.apply-filters {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 0.5rem 1.25rem;
-            font-weight: 600;
-            align-self: flex-end;
-        }
-
-        button.apply-filters:hover {
-            background: var(--primary-dark);
-            transform: translateY(-2px);
-        }
-
         /* Theme Toggle */
         .theme-toggle {
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            margin-bottom: 2rem;
+            justify-content: flex-end;
         }
 
         .theme-toggle-label {
@@ -457,45 +390,34 @@
             line-height: 1.3;
         }
 
-        /* Tag Cloud */
-        .tag-cloud {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 0.75rem;
-            padding: 1rem 0;
-        }
-
-        .tag {
-            padding: 0.5rem 1rem;
-            border-radius: 100px;
-            color: white;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            background: var(--primary);
-        }
-
-        .tag:hover {
-            transform: translateY(-3px) scale(1.05);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        /* Tooltip */
-        .tooltip {
-            position: absolute;
-            background: rgba(0, 0, 0, 0.85);
-            color: white;
-            padding: 0.75rem 1rem;
+        /* Weekly Trends */
+        .weekly-trend {
+            background: rgba(74, 144, 226, 0.05);
             border-radius: var(--radius);
-            font-size: 0.85rem;
-            z-index: 100;
-            pointer-events: none;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-            opacity: 0;
-            transition: opacity 0.2s ease;
-            max-width: 300px;
+            padding: 1.2rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--primary);
+        }
+
+        .weekly-trend-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .week-title {
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .trend-value {
+            font-weight: 700;
+            color: var(--success);
+        }
+
+        .trend-description {
+            font-size: 0.95rem;
+            line-height: 1.5;
         }
 
         /* Lists */
@@ -560,6 +482,59 @@
             color: #61afef;
         }
 
+        /* Special Tags */
+        .tag-item {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 100px;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .tag-item.better {
+            background: var(--success);
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius);
+            font-size: 0.85rem;
+            z-index: 100;
+            pointer-events: none;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            max-width: 300px;
+        }
+
+        /* Footer Styles */
+        footer {
+            background: var(--primary-dark);
+            color: white;
+            padding: 2rem 1rem;
+            text-align: center;
+            margin-top: 3rem;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .attribution {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
         /* Animation Classes */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
@@ -604,82 +579,9 @@
             .engagement-heatmap {
                 grid-template-columns: repeat(2, 1fr);
             }
-            
-            .nav-filters {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            
-            .filter-controls {
-                flex-direction: column;
-            }
 
             .chart-container {
                 height: 250px;
-            }
-        }
-
-        /* Footer Styles */
-        footer {
-            background: var(--primary-dark);
-            color: white;
-            padding: 2rem 1rem;
-            text-align: center;
-            margin-top: 3rem;
-        }
-
-        .footer-content {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        .footer-links {
-            display: flex;
-            justify-content: center;
-            gap: 2rem;
-            margin: 1rem 0;
-            flex-wrap: wrap;
-        }
-
-        .footer-link {
-            color: rgba(255, 255, 255, 0.8);
-            text-decoration: none;
-            transition: color 0.3s ease;
-        }
-
-        .footer-link:hover {
-            color: white;
-            text-decoration: underline;
-        }
-
-        .attribution {
-            margin-top: 1rem;
-            font-size: 0.9rem;
-            opacity: 0.8;
-        }
-
-        /* Animations for Chart Elements */
-        .bar-enter {
-            opacity: 0;
-            transform: scaleY(0);
-            transform-origin: bottom;
-        }
-
-        .bar-enter-active {
-            opacity: 1;
-            transform: scaleY(1);
-            transition: opacity 500ms, transform 500ms;
-        }
-
-        .line-animation {
-            stroke-dasharray: 1000;
-            stroke-dashoffset: 1000;
-            animation: dash 2s ease-in-out forwards;
-        }
-
-        @keyframes dash {
-            to {
-                stroke-dashoffset: 0;
             }
         }
     </style>
@@ -714,59 +616,25 @@
     </header>
 
     <div class="container">
-        <div class="nav-filters">
-            <div class="filter-controls">
-                <div class="filter-group">
-                    <label for="time-period">Time Period</label>
-                    <select id="time-period">
-                        <option value="all" selected>All (Feb 9 - Mar 9)</option>
-                        <option value="week1">Week 1 (Feb 9-15)</option>
-                        <option value="week2">Week 2 (Feb 16-22)</option>
-                        <option value="week3">Week 3 (Feb 23-Mar 1)</option>
-                        <option value="week4">Week 4 (Mar 2-9)</option>
-                    </select>
-                </div>
-                <div class="filter-group">
-                    <label for="topic-filter">Topic Category</label>
-                    <select id="topic-filter">
-                        <option value="all" selected>All Topics</option>
-                        <option value="python">Python Ecosystem</option>
-                        <option value="ml">Machine Learning</option>
-                        <option value="sql">SQL Variants</option>
-                        <option value="viz">Visualization Tools</option>
-                    </select>
-                </div>
-                <div class="filter-group">
-                    <label for="engagement-type">Engagement Metric</label>
-                    <select id="engagement-type">
-                        <option value="views" selected>Views</option>
-                        <option value="likes">Likes</option>
-                        <option value="comments">Comments</option>
-                        <option value="shares">Shares per 1k Views</option>
-                    </select>
-                </div>
-                <button class="apply-filters" id="apply-filters">Apply Filters</button>
-            </div>
-            <div class="theme-toggle">
-                <span class="theme-toggle-label">Dark Mode</span>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="theme-toggle">
-                    <span class="toggle-slider"></span>
-                </label>
-            </div>
+        <div class="theme-toggle">
+            <span class="theme-toggle-label">Dark Mode</span>
+            <label class="toggle-switch">
+                <input type="checkbox" id="theme-toggle">
+                <span class="toggle-slider"></span>
+            </label>
         </div>
 
         <div class="dashboard">
             <!-- Tool Popularity Card -->
             <div class="card">
                 <div class="card-header">
-                    <h2 class="card-title">Tool Popularity</h2>
+                    <h2 class="card-title">Tool Popularity Distribution</h2>
                 </div>
                 <div class="card-body">
                     <div id="tool-popularity-chart" class="chart-container"></div>
                     <div class="insight">
                         <div class="insight-title">Key Insight</div>
-                        <div class="insight-content">Python ecosystem dominates discussions at 77.1% of all posts, followed by Machine Learning at 62.9%.</div>
+                        <div class="insight-content">Posts mentioning PyTorch (23.4%) and TensorFlow (19.8%) showed 22% higher engagement than ML posts without framework specifications.</div>
                     </div>
                 </div>
             </div>
@@ -777,10 +645,28 @@
                     <h2 class="card-title">Weekly Posting Trends</h2>
                 </div>
                 <div class="card-body">
-                    <div id="weekly-trend-chart" class="chart-container"></div>
-                    <div class="insight">
-                        <div class="insight-title">Trend Analysis</div>
-                        <div class="insight-content">Week 3 (Feb 23-Mar 1) saw a 27% surge in Python debugging content correlating with PyCharm 2025.1 release.</div>
+                    <div class="weekly-trend">
+                        <div class="weekly-trend-header">
+                            <div class="week-title">Week 1 (Feb 9-15)</div>
+                            <div class="trend-value">+38%</div>
+                        </div>
+                        <div class="trend-description">38% increase in GPU optimization posts following NVIDIA's GTC announcements</div>
+                    </div>
+                    
+                    <div class="weekly-trend">
+                        <div class="weekly-trend-header">
+                            <div class="week-title">Week 3 (Feb 23-Mar 1)</div>
+                            <div class="trend-value">+27%</div>
+                        </div>
+                        <div class="trend-description">27% surge in Python debugging content correlating with PyCharm 2025.1 release</div>
+                    </div>
+                    
+                    <div class="weekly-trend">
+                        <div class="weekly-trend-header">
+                            <div class="week-title">Final Week (Mar 2-9)</div>
+                            <div class="trend-value">+41%</div>
+                        </div>
+                        <div class="trend-description">41% growth in SQL performance posts after Snowflake's query optimizer update</div>
                     </div>
                 </div>
             </div>
@@ -827,26 +713,39 @@
                             <div class="heatmap-label">Viz<br>Comment Rate</div>
                         </div>
                     </div>
-                    <div id="engagement-chart" class="chart-container"></div>
+                    
+                    <h3>Shares per 1,000 Views</h3>
+                    <div id="shares-chart" class="chart-container"></div>
+                    
                     <div class="insight">
                         <div class="insight-title">Content Format Impact</div>
-                        <div class="insight-content">Video posts about AutoML implementations achieved 2.3x more shares than text-based ML content.</div>
+                        <div class="insight-content">Video posts discussing AutoML implementations achieved 2.3x more shares than text-based ML content. Long-form articles (>1,500 words) about Python type hinting retained 72% more readers than shorter posts.</div>
                     </div>
                 </div>
             </div>
 
-            <!-- Popular Hashtags Card -->
+            <!-- Hashtag Analysis Card -->
             <div class="card">
                 <div class="card-header">
-                    <h2 class="card-title">Popular Hashtags</h2>
+                    <h2 class="card-title">Hashtag Strategy</h2>
                 </div>
                 <div class="card-body">
-                    <div id="hashtag-cloud" class="tag-cloud">
-                        <!-- Tags dynamically added by JS -->
-                    </div>
                     <div class="insight">
-                        <div class="insight-title">Hashtag Strategy</div>
+                        <div class="insight-title">Higher Engagement Hashtags</div>
                         <div class="insight-content">Posts with #MLOps showed 19% higher engagement than those with #MachineLearning.</div>
+                    </div>
+                    
+                    <div style="margin-top: 1.5rem;">
+                        <div class="tag-item better">#MLOps</div>
+                        <div class="tag-item">#MachineLearning</div>
+                        <p style="margin-top: 0.5rem; font-size: 0.9rem; opacity: 0.8;">Comparison shows 19% higher engagement with #MLOps</p>
+                    </div>
+                    
+                    <div class="metrics-container" style="margin-top: 2rem;">
+                        <div class="metric-box">
+                            <div class="metric-box-value">4.2</div>
+                            <div class="metric-box-label">Average Hashtags per Post</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -886,11 +785,11 @@
                         </div>
                         <div class="metric-box">
                             <div class="metric-box-value">2.1×</div>
-                            <div class="metric-box-label">More Shares for Career-Focused Content</div>
+                            <div class="metric-box-label">More Shares for Career Content</div>
                         </div>
                         <div class="metric-box">
                             <div class="metric-box-value">+27%</div>
-                            <div class="metric-box-label">Higher Views for Morning Posts</div>
+                            <div class="metric-box-label">Higher Views for Morning Posts (8-10 AM CET)</div>
                         </div>
                     </div>
                     
@@ -900,17 +799,12 @@
 <span class="code-keyword">import</span> dask.dataframe <span class="code-keyword">as</span> dd
 
 <span class="code-comment"># Parallel loading for big data</span>
-df = dd.<span class="code-function">read_csv</span>(<span class="code-string">'s3://bucket/*.csv'</span>)  
-
-<span class="code-comment"># Efficient group operations</span>
-result = df.<span class="code-function">groupby</span>(<span class="code-string">'category'</span>).<span class="code-function">agg</span>({
-    <span class="code-string">'value'</span>: [<span class="code-string">'mean'</span>, <span class="code-string">'sum'</span>]
-})
+df = dd.<span class="code-function">read_csv</span>(<span class="code-string">'s3://bucket/*.csv'</span>)
                     </div>
                     
                     <div class="insight">
                         <div class="insight-title">Platform-Specific Tactics</div>
-                        <div class="insight-content">Morning Posts (8-10 AM CET) showed 27% higher view consistency, and content linking tools to career advancement gained 2.1x more shares.</div>
+                        <div class="insight-content">Morning Posts (8-10 AM CET) showed 27% higher view consistency. Collaborative Content: Co-authored posts on SQL+Python increased reach by 41%.</div>
                     </div>
                 </div>
             </div>
@@ -921,56 +815,20 @@ result = df.<span class="code-function">groupby</span>(<span class="code-string"
         <div class="footer-content">
             <h3>LinkedIn Data Science Trends Analysis</h3>
             <p>Based on research of 2,387 posts from February 9 - March 9, 2025</p>
-            
-            <div class="footer-links">
-                <a href="#" class="footer-link">GitHub Repository</a>
-                <a href="#" class="footer-link">Methodology</a>
-                <a href="#" class="footer-link">About</a>
-                <a href="#" class="footer-link">Contact</a>
-            </div>
-            
-            <p class="attribution">© 2025 | Created by [Your Name] as a Data Science Project</p>
+            <p class="attribution">© 2025 | Created as a Data Science Project</p>
         </div>
     </footer>
 
     <div class="tooltip" id="tooltip" style="display: none;"></div>
 
     <script>
-        // Main data from research document
+        // Data directly from the research document
         const researchData = {
-            topics: [
+            tools: [
                 { name: "Python Ecosystem", value: 1842, percent: 77.1, views: 1672 },
                 { name: "Machine Learning", value: 1503, percent: 62.9, views: 1891 },
                 { name: "SQL Variants", value: 897, percent: 37.5, views: 1329 },
                 { name: "Visualization Tools", value: 643, percent: 26.9, views: 1245 }
-            ],
-            weeklyTrends: [
-                { week: 1, label: "Feb 9-15", count: 567, python: 432, ml: 388, sql: 201, viz: 142 },
-                { week: 2, label: "Feb 16-22", count: 598, python: 458, ml: 375, sql: 221, viz: 156 },
-                { week: 3, label: "Feb 23-Mar 1", count: 642, python: 502, ml: 392, sql: 232, viz: 172 },
-                { week: 4, label: "Mar 2-9", count: 580, python: 450, ml: 348, sql: 243, viz: 173 }
-            ],
-            hashtags: [
-                { text: "#datascience", size: 45, count: 1894 },
-                { text: "#python", size: 40, count: 1047 },
-                { text: "#machinelearning", size: 38, count: 982 },
-                { text: "#ai", size: 36, count: 875 },
-                { text: "#dataanalysis", size: 34, count: 762 },
-                { text: "#mlops", size: 32, count: 583 },
-                { text: "#deeplearning", size: 30, count: 524 },
-                { text: "#bigdata", size: 28, count: 487 },
-                { text: "#sql", size: 27, count: 463 },
-                { text: "#analytics", size: 25, count: 412 },
-                { text: "#pytorch", size: 23, count: 387 },
-                { text: "#tensorflow", size: 22, count: 342 },
-                { text: "#dataviz", size: 20, count: 312 },
-                { text: "#pandas", size: 19, count: 289 },
-                { text: "#cloudcomputing", size: 18, count: 272 },
-                { text: "#llm", size: 17, count: 251 },
-                { text: "#dataengineering", size: 16, count: 234 },
-                { text: "#career", size: 15, count: 218 },
-                { text: "#nlp", size: 14, count: 193 },
-                { text: "#dask", size: 13, count: 168 }
             ],
             engagement: {
                 sharesPerThousandViews: {
@@ -984,15 +842,12 @@ result = df.<span class="code-function">groupby</span>(<span class="code-string"
 
         // Initialize the dashboard on DOM content loaded
         document.addEventListener('DOMContentLoaded', function() {
-            // Create all charts
+            // Create charts
             createToolPopularityChart();
-            createWeeklyTrendChart();
-            createEngagementChart();
-            createHashtagCloud();
+            createSharesChart();
             
             // Set up event listeners
             document.getElementById('theme-toggle').addEventListener('change', toggleTheme);
-            document.getElementById('apply-filters').addEventListener('click', applyFilters);
             
             // Initial animations for cards
             animateCards();
@@ -1031,17 +886,17 @@ result = df.<span class="code-function">groupby</span>(<span class="code-string"
                 
             // Create scales
             const xScale = d3.scaleBand()
-                .domain(researchData.topics.map(d => d.name))
+                .domain(researchData.tools.map(d => d.name))
                 .range([0, innerWidth])
                 .padding(0.3);
                 
             const yScale = d3.scaleLinear()
-                .domain([0, d3.max(researchData.topics, d => d.percent) * 1.1])
+                .domain([0, d3.max(researchData.tools, d => d.percent) * 1.1])
                 .range([innerHeight, 0]);
                 
             // Create color scale
             const colorScale = d3.scaleOrdinal()
-                .domain(researchData.topics.map(d => d.name))
+                .domain(researchData.tools.map(d => d.name))
                 .range(['#4a90e2', '#50e3c2', '#b678c4', '#f7c244']);
                 
             // Create axes
@@ -1071,7 +926,7 @@ result = df.<span class="code-function">groupby</span>(<span class="code-string"
             // Create gradient definitions
             const defs = svg.append('defs');
             
-            researchData.topics.forEach((topic, i) => {
+            researchData.tools.forEach((topic, i) => {
                 const gradientId = `bar-gradient-${i}`;
                 const gradient = defs.append('linearGradient')
                     .attr('id', gradientId)
@@ -1091,10 +946,10 @@ result = df.<span class="code-function">groupby</span>(<span class="code-string"
             
             // Create bars with animation
             const bars = g.selectAll('.bar')
-                .data(researchData.topics)
+                .data(researchData.tools)
                 .enter()
                 .append('rect')
-                .attr('class', 'bar bar-enter')
+                .attr('class', 'bar')
                 .attr('x', d => xScale(d.name))
                 .attr('width', xScale.bandwidth())
                 .attr('y', innerHeight)
@@ -1119,7 +974,7 @@ result = df.<span class="code-function">groupby</span>(<span class="code-string"
                 
             // Add value labels on top of bars
             g.selectAll('.bar-label')
-                .data(researchData.topics)
+                .data(researchData.tools)
                 .enter()
                 .append('text')
                 .attr('class', 'bar-label')
@@ -1136,162 +991,9 @@ result = df.<span class="code-function">groupby</span>(<span class="code-string"
                 .style('opacity', 1);
         }
 
-        // Weekly Trend Chart
-        function createWeeklyTrendChart() {
-            const chartContainer = document.getElementById('weekly-trend-chart');
-            const width = chartContainer.clientWidth;
-            const height = chartContainer.clientHeight || 300;
-            const margin = { top: 20, right: 60, bottom: 40, left: 50 };
-            const innerWidth = width - margin.left - margin.right;
-            const innerHeight = height - margin.top - margin.bottom;
-            
-            // Clear any existing content
-            chartContainer.innerHTML = '';
-            
-            // Create SVG
-            const svg = d3.select(chartContainer)
-                .append('svg')
-                .attr('width', width)
-                .attr('height', height);
-                
-            const g = svg.append('g')
-                .attr('transform', `translate(${margin.left},${margin.top})`);
-                
-            // Create scales
-            const xScale = d3.scaleBand()
-                .domain(researchData.weeklyTrends.map(d => d.label))
-                .range([0, innerWidth])
-                .padding(0.1);
-                
-            const yScale = d3.scaleLinear()
-                .domain([0, d3.max(researchData.weeklyTrends, d => d.count) * 1.1])
-                .range([innerHeight, 0]);
-                
-            // Create line generator for each tool
-            const lineGenerator = d3.line()
-                .x(d => xScale(d.label) + xScale.bandwidth() / 2)
-                .y(d => yScale(d.count))
-                .curve(d3.curveMonotoneX);
-                
-            const pythonLine = d3.line()
-                .x(d => xScale(d.label) + xScale.bandwidth() / 2)
-                .y(d => yScale(d.python))
-                .curve(d3.curveMonotoneX);
-                
-            const mlLine = d3.line()
-                .x(d => xScale(d.label) + xScale.bandwidth() / 2)
-                .y(d => yScale(d.ml))
-                .curve(d3.curveMonotoneX);
-                
-            const sqlLine = d3.line()
-                .x(d => xScale(d.label) + xScale.bandwidth() / 2)
-                .y(d => yScale(d.sql))
-                .curve(d3.curveMonotoneX);
-                
-            // Create axes
-            g.append('g')
-                .attr('transform', `translate(0,${innerHeight})`)
-                .call(d3.axisBottom(xScale))
-                .style('font-size', '12px');
-                
-            g.append('g')
-                .call(d3.axisLeft(yScale))
-                .style('font-size', '12px');
-                
-            // Add y-axis label
-            g.append('text')
-                .attr('transform', 'rotate(-90)')
-                .attr('y', -40)
-                .attr('x', -innerHeight / 2)
-                .attr('text-anchor', 'middle')
-                .text('Number of Posts')
-                .style('font-size', '12px');
-                
-            // Add total posts bars
-            g.selectAll('.week-bar')
-                .data(researchData.weeklyTrends)
-                .enter()
-                .append('rect')
-                .attr('class', 'week-bar')
-                .attr('x', d => xScale(d.label))
-                .attr('width', xScale.bandwidth())
-                .attr('y', d => yScale(d.count))
-                .attr('height', d => innerHeight - yScale(d.count))
-                .attr('fill', 'rgba(74, 144, 226, 0.2)')
-                .attr('rx', 3)
-                .on('mouseover', function(event, d) {
-                    showTooltip(event, `<strong>${d.label}</strong><br>Total Posts: ${d.count}<br>Python: ${d.python}<br>ML: ${d.ml}<br>SQL: ${d.sql}<br>Viz: ${d.viz}`);
-                    d3.select(this).attr('fill', 'rgba(74, 144, 226, 0.3)');
-                })
-                .on('mouseout', function() {
-                    hideTooltip();
-                    d3.select(this).attr('fill', 'rgba(74, 144, 226, 0.2)');
-                });
-                
-            // Add lines for each tool category
-            const toolCategories = [
-                { name: 'Python', accessor: 'python', color: '#4a90e2', lineFunc: pythonLine },
-                { name: 'ML', accessor: 'ml', color: '#50e3c2', lineFunc: mlLine },
-                { name: 'SQL', accessor: 'sql', color: '#b678c4', lineFunc: sqlLine }
-            ];
-            
-            toolCategories.forEach(category => {
-                // Add the line
-                g.append('path')
-                    .datum(researchData.weeklyTrends)
-                    .attr('fill', 'none')
-                    .attr('stroke', category.color)
-                    .attr('stroke-width', 3)
-                    .attr('d', category.lineFunc)
-                    .attr('class', 'line-animation');
-                    
-                // Add dots for each data point
-                g.selectAll(`.dot-${category.accessor}`)
-                    .data(researchData.weeklyTrends)
-                    .enter()
-                    .append('circle')
-                    .attr('class', `dot-${category.accessor}`)
-                    .attr('cx', d => xScale(d.label) + xScale.bandwidth() / 2)
-                    .attr('cy', d => yScale(d[category.accessor]))
-                    .attr('r', 5)
-                    .attr('fill', category.color)
-                    .attr('stroke', '#fff')
-                    .attr('stroke-width', 2)
-                    .on('mouseover', function(event, d) {
-                        showTooltip(event, `<strong>${category.name}</strong>: ${d[category.accessor]} posts<br>Week: ${d.label}`);
-                        d3.select(this).attr('r', 7);
-                    })
-                    .on('mouseout', function() {
-                        hideTooltip();
-                        d3.select(this).attr('r', 5);
-                    });
-            });
-            
-            // Add legend
-            const legend = g.append('g')
-                .attr('transform', `translate(${innerWidth - 100}, 10)`);
-                
-            toolCategories.forEach((category, i) => {
-                const legendRow = legend.append('g')
-                    .attr('transform', `translate(0, ${i * 20})`);
-                    
-                legendRow.append('rect')
-                    .attr('width', 10)
-                    .attr('height', 10)
-                    .attr('fill', category.color);
-                    
-                legendRow.append('text')
-                    .attr('x', 15)
-                    .attr('y', 10)
-                    .attr('text-anchor', 'start')
-                    .style('font-size', '12px')
-                    .text(category.name);
-            });
-        }
-
-        // Engagement Chart
-        function createEngagementChart() {
-            const chartContainer = document.getElementById('engagement-chart');
+        // Shares per 1000 Views Chart
+        function createSharesChart() {
+            const chartContainer = document.getElementById('shares-chart');
             const width = chartContainer.clientWidth;
             const height = chartContainer.clientHeight || 300;
             const margin = { top: 20, right: 30, bottom: 40, left: 50 };
@@ -1341,23 +1043,6 @@ result = df.<span class="code-function">groupby</span>(<span class="code-string"
                 
             g.append('g')
                 .call(d3.axisLeft(yScale))
-                .style('font-size', '12px');
-                
-            // Add title and y-axis label
-            g.append('text')
-                .attr('y', -5)
-                .attr('x', innerWidth / 2)
-                .attr('text-anchor', 'middle')
-                .text('Shares per 1,000 Views')
-                .style('font-size', '14px')
-                .style('font-weight', 'bold');
-                
-            g.append('text')
-                .attr('transform', 'rotate(-90)')
-                .attr('y', -40)
-                .attr('x', -innerHeight / 2)
-                .attr('text-anchor', 'middle')
-                .text('Shares per 1k Views')
                 .style('font-size', '12px');
                 
             // Create gradient definitions
@@ -1428,56 +1113,6 @@ result = df.<span class="code-function">groupby</span>(<span class="code-string"
                 .style('opacity', 1);
         }
 
-        // Hashtag Cloud
-        function createHashtagCloud() {
-            const container = document.getElementById('hashtag-cloud');
-            container.innerHTML = '';
-            
-            // Sort hashtags by count
-            const sortedHashtags = [...researchData.hashtags].sort((a, b) => b.count - a.count);
-            
-            // Generate a color scale
-            const colorScale = d3.scaleOrdinal()
-                .domain(Array.from({ length: sortedHashtags.length }, (_, i) => i))
-                .range([
-                    '#4a90e2', '#50e3c2', '#b678c4', '#f7c244', 
-                    '#ff6b6b', '#48dbfb', '#1dd1a1', '#5f27cd', 
-                    '#ff9ff3', '#00d2d3', '#7C9ED9', '#EFC958', 
-                    '#B8C5D6', '#8795A1', '#FF5A5F', '#007AFF'
-                ]);
-            
-            // Create each tag element
-            sortedHashtags.forEach((tag, i) => {
-                const tagEl = document.createElement('div');
-                tagEl.className = 'tag';
-                tagEl.textContent = tag.text;
-                tagEl.style.fontSize = `${tag.size / 10 + 0.8}rem`;
-                tagEl.style.backgroundColor = colorScale(i);
-                
-                // Add animation delay based on index
-                tagEl.style.opacity = '0';
-                tagEl.style.transform = 'scale(0.5)';
-                tagEl.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-                
-                // Event listeners for tooltip
-                tagEl.addEventListener('mouseover', function(event) {
-                    showTooltip(event, `${tag.text}: ${tag.count} mentions`);
-                });
-                
-                tagEl.addEventListener('mouseout', function() {
-                    hideTooltip();
-                });
-                
-                container.appendChild(tagEl);
-                
-                // Trigger animation after a slight delay
-                setTimeout(() => {
-                    tagEl.style.opacity = '1';
-                    tagEl.style.transform = 'scale(1)';
-                }, i * 30);
-            });
-        }
-
         // Tooltip handling
         function showTooltip(event, content) {
             const tooltip = document.getElementById('tooltip');
@@ -1519,45 +1154,13 @@ result = df.<span class="code-function">groupby</span>(<span class="code-string"
             
             // Redraw charts to update colors
             createToolPopularityChart();
-            createWeeklyTrendChart();
-            createEngagementChart();
-        }
-
-        // Apply filters
-        function applyFilters() {
-            const period = document.getElementById('time-period').value;
-            const topic = document.getElementById('topic-filter').value;
-            const engagement = document.getElementById('engagement-type').value;
-            
-            // Show "loading" state
-            const cards = document.querySelectorAll('.card');
-            cards.forEach(card => {
-                card.style.opacity = '0.7';
-            });
-            
-            // Simulate data processing
-            setTimeout(() => {
-                // Restore cards and show a message
-                cards.forEach(card => {
-                    card.style.opacity = '1';
-                });
-                
-                // Redraw charts
-                createToolPopularityChart();
-                createWeeklyTrendChart();
-                createEngagementChart();
-                createHashtagCloud();
-                
-                // In a real implementation, you would filter the data here
-                alert(`Filters applied:\nPeriod: ${period}\nTopic: ${topic}\nEngagement: ${engagement}\n\nIn a production environment, this would update the visualization with filtered data.`);
-            }, 800);
+            createSharesChart();
         }
 
         // Handle resize events to make charts responsive
         window.addEventListener('resize', debounce(function() {
             createToolPopularityChart();
-            createWeeklyTrendChart();
-            createEngagementChart();
+            createSharesChart();
         }, 250));
 
         // Debounce function for resize events
